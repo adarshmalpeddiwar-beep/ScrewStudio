@@ -108,7 +108,14 @@ button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(
 .viewer{position:relative;aspect-ratio:4/3;max-width:100%;border-radius:14px;background:radial-gradient(110% 85% at 50% 25%,var(--sheet),var(--fill));overflow:hidden}
 .viewer canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 .viewer .busy{position:absolute;inset:0;display:grid;place-items:center;font-size:13.5px;color:var(--ink2);text-align:center;padding:16px}
-.viewer .tip{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:11.5px;color:var(--ink3);pointer-events:none}
+.viewer .tip{position:absolute;top:10px;left:0;right:0;text-align:center;font-size:11.5px;color:var(--ink3);pointer-events:none}
+.vctl{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:var(--bar);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line2);max-width:calc(100% - 20px)}
+.vctl button{width:40px;height:40px;border:0;border-radius:50%;background:transparent;display:grid;place-items:center;color:var(--ink);touch-action:none;-webkit-user-select:none;user-select:none;flex:0 0 auto}
+.vctl button:hover{background:var(--fill2)}
+.vctl button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.vctl svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.vctl .sep{width:1px;height:22px;background:var(--line);margin:0 3px;flex:0 0 auto}
+@media (max-width:420px){.vctl button{width:34px;height:34px}.vctl .sep{margin:0 1px}}
 .cadbar{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:16px;align-items:center}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px 16px;margin-top:16px}
 .stat .k{font-size:12px;color:var(--ink2)}
@@ -181,7 +188,19 @@ footer .made{font-size:13px;color:var(--ink)}
             <h3>CAD model <span class="live" id="live"><i></i><span id="liveTxt">Up to date</span></span></h3>
             <div class="viewer" id="viewer">
               <canvas id="cv"></canvas>
-              <div class="tip">Drag to rotate · scroll to zoom · double-click to reset</div>
+              <div class="tip" id="vTip">Drag to rotate · scroll to zoom · double-click to reset</div>
+              <div class="vctl" role="group" aria-label="Model view controls">
+                <button id="vLeft" aria-label="Rotate left"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+                <button id="vUp" aria-label="Tilt up"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 15l7-7 7 7"/></svg></button>
+                <button id="vDown" aria-label="Tilt down"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg></button>
+                <button id="vRight" aria-label="Rotate right"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+                <span class="sep"></span>
+                <button id="vIn" aria-label="Zoom in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+                <button id="vOut" aria-label="Zoom out"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+                <span class="sep"></span>
+                <button id="vSpin" aria-label="Auto-rotate" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg></button>
+                <button id="vReset" aria-label="Reset view"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h3M17 12h3M12 4v3M12 17v3"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
               <div class="busy" id="busy" hidden></div>
             </div>
             <div class="stats" id="stats"></div>
@@ -983,12 +1002,47 @@ function initViewer() {
   R3 = { renderer, scene, camera, pivot, holder, yaw: -0.6, pitch: 0.35, dist: 50, base: 50, target: new THREE.Vector3() };
   const size = () => { const w = cv.clientWidth, h = cv.clientHeight; if (w && h) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); draw(); } };
   new ResizeObserver(size).observe(cv); size();
-  let drag = null;
-  cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw: R3.yaw, pitch: R3.pitch }; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
-  cv.addEventListener('pointermove', e => { if (!drag) return; R3.yaw = drag.yaw + (e.clientX - drag.x) * 0.01; R3.pitch = Math.max(-1.45, Math.min(1.45, drag.pitch + (e.clientY - drag.y) * 0.01)); draw(); });
-  const up = () => { drag = null; cv.style.cursor = 'grab'; }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-  cv.addEventListener('wheel', e => { e.preventDefault(); R3.dist = Math.max(R3.base * 0.25, Math.min(R3.base * 4, R3.dist * Math.exp(e.deltaY * 0.0012))); draw(); }, { passive: false });
-  cv.addEventListener('dblclick', () => { R3.yaw = -0.6; R3.pitch = 0.35; R3.dist = R3.base; draw(); });
+  if (matchMedia('(pointer: coarse)').matches) $('vTip').textContent = 'Drag to rotate · pinch to zoom · double-tap to reset';
+  // ---- input: mouse, pen and touch (one finger rotates, two fingers pinch-zoom) ----
+  const pts = new Map(); let drag = null, pinch = null, lastTap = 0;
+  const reset = () => { R3.yaw = -0.6; R3.pitch = 0.35; R3.dist = R3.base; draw(); };
+  const zoomBy = f => { R3.dist = Math.max(R3.base * 0.25, Math.min(R3.base * 4, R3.dist * f)); draw(); };
+  const startDrag = (x, y) => { drag = { x, y, yaw: R3.yaw, pitch: R3.pitch }; };
+  const moveDrag = (x, y) => { if (!drag) return; R3.yaw = drag.yaw + (x - drag.x) * 0.011; R3.pitch = Math.max(-1.45, Math.min(1.45, drag.pitch + (y - drag.y) * 0.011)); draw(); };
+  const pinchDist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+  cv.addEventListener('pointerdown', e => {
+    e.preventDefault(); stopSpin(); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    if (pts.size === 1) { startDrag(e.clientX, e.clientY); cv.style.cursor = 'grabbing';
+      if (e.pointerType !== 'mouse') { const now = Date.now(); if (now - lastTap < 300) reset(); lastTap = now; } }
+    else if (pts.size === 2) { drag = null; pinch = { d: pinchDist(), dist: R3.dist }; }
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return; e.preventDefault(); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch && pts.size >= 2) { R3.dist = Math.max(R3.base * 0.25, Math.min(R3.base * 4, pinch.dist * pinch.d / pinchDist())); draw(); }
+    else moveDrag(e.clientX, e.clientY);
+  });
+  const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null;
+    if (pts.size === 1) { const p = [...pts.values()][0]; startDrag(p.x, p.y); } else if (!pts.size) { drag = null; cv.style.cursor = 'grab'; } };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up); cv.addEventListener('lostpointercapture', up);
+  // stop the page or app from scrolling while a finger is on the model
+  ['touchstart', 'touchmove'].forEach(ev => cv.addEventListener(ev, e => { if (e.cancelable) e.preventDefault(); }, { passive: false }));
+  cv.addEventListener('wheel', e => { e.preventDefault(); zoomBy(Math.exp(e.deltaY * 0.0012)); }, { passive: false });
+  cv.addEventListener('dblclick', reset);
+  cv.addEventListener('contextmenu', e => e.preventDefault());
+  // on-screen controls
+  let spinT = null, holdT = null;
+  function stopSpin() { if (spinT) { cancelAnimationFrame(spinT); spinT = null; $('vSpin').setAttribute('aria-pressed', 'false'); } }
+  const spin = () => { R3.yaw += 0.012; draw(); spinT = requestAnimationFrame(spin); };
+  $('vSpin').onclick = () => { if (spinT) stopSpin(); else { $('vSpin').setAttribute('aria-pressed', 'true'); spin(); } };
+  const nudge = { vLeft: () => { R3.yaw -= 0.06; }, vRight: () => { R3.yaw += 0.06; }, vUp: () => { R3.pitch = Math.max(-1.45, R3.pitch - 0.06); }, vDown: () => { R3.pitch = Math.min(1.45, R3.pitch + 0.06); }, vIn: () => { R3.dist = Math.max(R3.base * 0.25, R3.dist / 1.04); }, vOut: () => { R3.dist = Math.min(R3.base * 4, R3.dist * 1.04); } };
+  for (const [id, fn] of Object.entries(nudge)) {
+    const b = $(id), stop = () => { clearInterval(holdT); holdT = null; };
+    b.addEventListener('pointerdown', e => { e.preventDefault(); stopSpin(); fn(); draw(); stop(); holdT = setInterval(() => { fn(); draw(); }, 30); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+    b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); draw(); } });
+  }
+  $('vReset').onclick = () => { stopSpin(); reset(); };
   matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', recolor);
   new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 }
