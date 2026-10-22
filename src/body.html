@@ -1,0 +1,81 @@
+<header class="bar gut">
+  <div class="in">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2.5h8l4 7-4 7H8l-4-7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="9.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 16.5v5M14 16.5v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>ISO Screw Studio</span>
+    </div>
+    <div class="right">
+      <span class="made">Made by <a href="https://www.instagram.com/underdogbuilder/" target="_blank" rel="noopener">@underdogbuilder</a></span>
+      <button class="theme" id="themeBtn" aria-label="Switch to dark mode"></button>
+    </div>
+  </div>
+</header>
+
+<main class="gut">
+  <div class="in">
+    <section class="hero">
+      <h1>Every screw. To the standard.</h1>
+      <p>Pick a head, drive, size and length. The drawing and the CAD model update the moment you do.</p>
+      <form class="cmd" id="cmdForm" autocomplete="off">
+        <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="cmd" aria-label="Command" placeholder="Try “M4 x 16 button torx” or “modelled thread”">
+        <button class="btn primary" type="submit">Go</button>
+      </form>
+      <div class="cmd-msg" id="cmdMsg" aria-live="polite"></div>
+    </section>
+
+    <div class="grid">
+      <aside class="rail" aria-label="Screw configuration">
+        <div class="group"><div class="glabel"><b>Head</b><small id="stdTag"></small></div><div class="heads" id="heads"></div></div>
+        <div class="group"><div class="glabel"><b>Drive</b><small id="driveTag"></small></div><div class="drives" id="drives"></div></div>
+        <div class="group"><div class="glabel"><b>Thread size</b><small id="sizeTag"></small></div><div class="chips" id="sizes"></div></div>
+        <div class="group"><div class="glabel"><b>Pitch</b><small>ISO 261</small></div><div class="chips" id="pitches"></div></div>
+        <div class="group"><div class="glabel"><b>Length</b><small id="lenTag"></small></div>
+          <div class="lenrow"><button class="btn" id="lenDown" aria-label="Shorter">−</button><select id="len" aria-label="Length"></select><button class="btn" id="lenUp" aria-label="Longer">+</button></div>
+        </div>
+        <div class="group"><div class="glabel"><b>Thread in CAD</b></div>
+          <div class="seg" id="threadSeg"><button id="thPlain" aria-pressed="true">Cosmetic</button><button id="thHelix" aria-pressed="false">Modelled helix</button></div>
+          <p class="hint" id="threadHint"></p>
+        </div>
+      </aside>
+
+      <section class="main">
+        <div class="sheetbox">
+          <div class="sheethead"><div><div class="eyebrow" id="eyebrow"></div><h2 id="desig"></h2></div><div class="acts"><button class="btn" id="dlSvg">Save drawing</button></div></div>
+          <div id="warnBox" class="warn" hidden></div>
+          <div id="sheet" role="img" aria-label="Dimensioned engineering drawing"></div>
+        </div>
+
+        <div class="bench">
+          <div class="card">
+            <h3>CAD model <span class="live" id="live"><i></i><span id="liveTxt">Up to date</span></span></h3>
+            <div class="viewer" id="viewer">
+              <canvas id="cv"></canvas>
+              <div class="tip">Drag to rotate · scroll to zoom · double-click to reset</div>
+              <div class="busy" id="busy" hidden></div>
+            </div>
+            <div class="stats" id="stats"></div>
+            <div class="cadbar">
+              <button class="btn primary" id="dlZip" disabled>Download STEP + STL</button>
+              <span class="dl-msg" id="dlMsg"></span>
+            </div>
+            <p class="notes">STEP files are AP214 faceted B-rep solids in millimetres, which SolidWorks, Fusion, Onshape, FreeCAD and Inventor import as closed solid bodies. The origin sits on the screw axis at the length reference plane: under the head, or on the top face for countersunk heads. +Z points toward the head.</p>
+          </div>
+          <div class="card">
+            <h3>Dimensions</h3>
+            <table class="spec" id="spec"></table>
+            <p class="notes" id="specNote"></p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="gut">
+  <div class="in">
+    <span class="made">Made by <a href="https://www.instagram.com/underdogbuilder/" target="_blank" rel="noopener">@underdogbuilder</a></span>
+    <span>Dimensions from ISO 4762, 7380-1, 10642, 2009, 7046-1, 14581, 1580, 7045, 14583, 1207, 14580, 14579 and 4017.</span>
+  </div>
+</footer>
+

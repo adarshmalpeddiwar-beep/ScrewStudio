@@ -1,0 +1,1141 @@
+<title>ISO Screw Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Apple-style product page. Frosted top bar, centred hero, configurator rail beside a live drawing, CAD bench below. */
+:root{
+  --bg:#F5F5F7; --card:#FFFFFF; --sheet:#FFFFFF; --ink:#1D1D1F; --ink2:#6E6E73; --ink3:#A1A1A6;
+  --line:#D2D2D7; --line2:#E8E8ED; --fill:#F5F5F7; --fill2:#E8E8ED;
+  --accent:#0071E3; --accent-ink:#0066CC; --on-accent:#FFFFFF;
+  --dim:#0066CC; --warn:#B64400; --warn-wash:#FFF1E6; --ok:#248A3D;
+  --steel:#B9BEC4; --edge:#3A3A3C; --bar:rgba(245,245,247,.8); --shadow:0 2px 14px rgba(0,0,0,.05);
+  --f-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --f-body:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --f-mono:"SF Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#000000; --card:#1C1C1E; --sheet:#141416; --ink:#F5F5F7; --ink2:#A1A1A6; --ink3:#6E6E73;
+  --line:#3A3A3C; --line2:#2C2C2E; --fill:#2C2C2E; --fill2:#3A3A3C;
+  --accent:#0A84FF; --accent-ink:#2997FF; --on-accent:#FFFFFF;
+  --dim:#64B5FF; --warn:#FF9F0A; --warn-wash:#2E2008; --ok:#30D158;
+  --steel:#9EA4AA; --edge:#D1D1D6; --bar:rgba(22,22,23,.75); --shadow:none; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#000000; --card:#1C1C1E; --sheet:#141416; --ink:#F5F5F7; --ink2:#A1A1A6; --ink3:#6E6E73;
+  --line:#3A3A3C; --line2:#2C2C2E; --fill:#2C2C2E; --fill2:#3A3A3C;
+  --accent:#0A84FF; --accent-ink:#2997FF; --on-accent:#FFFFFF;
+  --dim:#64B5FF; --warn:#FF9F0A; --warn-wash:#2E2008; --ok:#30D158;
+  --steel:#9EA4AA; --edge:#D1D1D6; --bar:rgba(22,22,23,.75); --shadow:none; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.47;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bar)}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.in{max-width:1320px;margin:0 auto}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bar);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line2)}
+.bar .in{display:flex;align-items:center;justify-content:space-between;gap:12px;height:52px}
+.bar .logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:15px;min-width:0;white-space:nowrap}
+.made{font-size:12.5px;color:var(--ink2);white-space:nowrap}
+.made a{color:var(--accent-ink);text-decoration:none}
+.made a:hover{text-decoration:underline}
+.bar .right{display:flex;align-items:center;gap:14px;min-width:0}
+.theme{width:34px;height:34px;border-radius:50%;border:0;background:var(--fill);display:grid;place-items:center;color:var(--ink);flex:0 0 auto}
+.theme:hover{background:var(--fill2)}
+.theme svg{width:17px;height:17px}
+@media (max-width:440px){.bar .made{font-size:11.5px}.bar .logo span{display:none}}
+.hero{text-align:center;padding-block:48px 28px}
+.hero h1{font-family:var(--f-display);font-weight:700;font-size:clamp(34px,5.2vw,56px);letter-spacing:-.025em;line-height:1.05;margin:0;text-wrap:balance}
+.hero p{margin:12px auto 0;max-width:620px;font-size:clamp(16px,1.9vw,20px);color:var(--ink2);text-wrap:balance}
+.cmd{margin:26px auto 0;max-width:660px;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 5px 5px 18px;box-shadow:var(--shadow)}
+.cmd svg{flex:0 0 auto;color:var(--ink3)}
+.cmd input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15.5px;color:var(--ink);padding:9px 4px;outline:none}
+.cmd:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.cmd-msg{font-size:13.5px;color:var(--ink2);min-height:20px;margin-top:10px}
+.cmd-msg.err{color:var(--warn)}
+button{font:inherit;cursor:pointer;color:var(--ink)}
+button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{border:0;background:var(--fill);border-radius:999px;padding:9px 18px;font-weight:500;font-size:14.5px}
+.btn:hover{background:var(--fill2)}
+.btn.primary{background:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}}
+.rail{background:var(--card);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:22px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 68px);box-shadow:var(--shadow)}
+@media (max-width:980px){.rail{position:static}}
+.group{display:flex;flex-direction:column;gap:10px}
+.glabel{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.glabel b{font-weight:600;font-size:15px}
+.glabel small{font-size:12px;color:var(--ink2);text-align:right}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 11px;font-size:13.5px;font-weight:500;line-height:1.15;font-variant-numeric:tabular-nums;transition:border-color .15s}
+.chip:hover:not(:disabled){border-color:var(--ink3)}
+.chip[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent-ink)}
+.chip:disabled{opacity:.3;cursor:not-allowed}
+.chip .sub{display:block;font-size:10.5px;font-weight:400;color:var(--ink2);margin-top:2px}
+.heads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.hcard{display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:9px 10px;text-align:left;min-width:0;transition:border-color .15s}
+.hcard:hover{border-color:var(--ink3)}
+.hcard svg{flex:0 0 38px;height:32px}
+.hcard .t{font-weight:600;font-size:13.5px;line-height:1.2}
+.hcard .n{font-size:11.5px;color:var(--ink2);line-height:1.25}
+.hcard[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.drives{display:flex;flex-wrap:wrap;gap:6px}
+.dchip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:7px 12px 7px 8px;font-size:13.5px;font-weight:500;transition:border-color .15s}
+.dchip:hover{border-color:var(--ink3)}
+.dchip svg{width:22px;height:22px}
+.dchip[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent-ink)}
+.lenrow{display:flex;gap:6px;align-items:stretch}
+.lenrow select{flex:1;min-width:0;font:inherit;font-size:15px;font-weight:500;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-variant-numeric:tabular-nums}
+.lenrow .btn{padding:6px 14px;font-size:17px;line-height:1}
+.seg{display:flex;background:var(--fill);border-radius:10px;padding:2px;gap:2px}
+.seg button{flex:1;border:0;background:transparent;padding:7px 6px;font-size:13.5px;font-weight:500;border-radius:8px;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.hint{font-size:12.5px;color:var(--ink2);margin:0}
+.main{display:flex;flex-direction:column;gap:20px;min-width:0}
+.sheetbox{background:var(--card);border-radius:20px;padding:18px;min-width:0;box-shadow:var(--shadow)}
+.sheetbox svg{display:block;width:100%;height:auto;border-radius:10px;background:var(--sheet)}
+.sheethead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;padding:0 2px 14px}
+.eyebrow{font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:2px}
+.sheethead h2{margin:0;font-family:var(--f-display);font-weight:700;font-size:24px;letter-spacing:-.02em;text-wrap:balance}
+.warn{background:var(--warn-wash);color:var(--warn);border-radius:12px;padding:10px 14px;font-size:13.5px;margin-bottom:12px}
+.bench{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px}
+@media (max-width:1180px){.bench{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border-radius:20px;padding:18px;min-width:0;box-shadow:var(--shadow)}
+.card h3{margin:0 0 12px;font-family:var(--f-display);font-weight:700;font-size:21px;letter-spacing:-.02em;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.live{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-body);font-size:12.5px;font-weight:500;color:var(--ink2);letter-spacing:0}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.live.busy i{background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.viewer{position:relative;aspect-ratio:4/3;max-width:100%;border-radius:14px;background:radial-gradient(110% 85% at 50% 25%,var(--sheet),var(--fill));overflow:hidden}
+.viewer canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.viewer .busy{position:absolute;inset:0;display:grid;place-items:center;font-size:13.5px;color:var(--ink2);text-align:center;padding:16px}
+.viewer .tip{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:11.5px;color:var(--ink3);pointer-events:none}
+.cadbar{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:16px;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px 16px;margin-top:16px}
+.stat .k{font-size:12px;color:var(--ink2)}
+.stat .v{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.ok{color:var(--ok)}
+table.spec{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.spec td{padding:9px 4px;border-bottom:1px solid var(--line2);vertical-align:top;font-size:14px}
+table.spec tr:last-child td{border-bottom:0}
+table.spec td:first-child{font-family:var(--f-mono);font-size:12.5px;color:var(--accent-ink);width:40px;font-style:italic}
+table.spec td.v{text-align:right;white-space:nowrap;font-weight:600}
+table.spec td.src{font-size:12px;color:var(--ink3);text-align:right;white-space:nowrap}
+.notes{font-size:12.5px;color:var(--ink2);margin:14px 0 0;line-height:1.5}
+.dl-msg{font-size:12.5px;color:var(--ink2)}
+footer{border-top:1px solid var(--line2);margin-top:32px;padding-block:22px 34px}
+footer .in{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;font-size:12px;color:var(--ink2)}
+footer .made{font-size:13px;color:var(--ink)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="bar gut">
+  <div class="in">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2.5h8l4 7-4 7H8l-4-7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="9.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 16.5v5M14 16.5v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>ISO Screw Studio</span>
+    </div>
+    <div class="right">
+      <span class="made">Made by <a href="https://www.instagram.com/underdogbuilder/" target="_blank" rel="noopener">@underdogbuilder</a></span>
+      <button class="theme" id="themeBtn" aria-label="Switch to dark mode"></button>
+    </div>
+  </div>
+</header>
+
+<main class="gut">
+  <div class="in">
+    <section class="hero">
+      <h1>Every screw. To the standard.</h1>
+      <p>Pick a head, drive, size and length. The drawing and the CAD model update the moment you do.</p>
+      <form class="cmd" id="cmdForm" autocomplete="off">
+        <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="cmd" aria-label="Command" placeholder="Try “M4 x 16 button torx” or “modelled thread”">
+        <button class="btn primary" type="submit">Go</button>
+      </form>
+      <div class="cmd-msg" id="cmdMsg" aria-live="polite"></div>
+    </section>
+
+    <div class="grid">
+      <aside class="rail" aria-label="Screw configuration">
+        <div class="group"><div class="glabel"><b>Head</b><small id="stdTag"></small></div><div class="heads" id="heads"></div></div>
+        <div class="group"><div class="glabel"><b>Drive</b><small id="driveTag"></small></div><div class="drives" id="drives"></div></div>
+        <div class="group"><div class="glabel"><b>Thread size</b><small id="sizeTag"></small></div><div class="chips" id="sizes"></div></div>
+        <div class="group"><div class="glabel"><b>Pitch</b><small>ISO 261</small></div><div class="chips" id="pitches"></div></div>
+        <div class="group"><div class="glabel"><b>Length</b><small id="lenTag"></small></div>
+          <div class="lenrow"><button class="btn" id="lenDown" aria-label="Shorter">−</button><select id="len" aria-label="Length"></select><button class="btn" id="lenUp" aria-label="Longer">+</button></div>
+        </div>
+        <div class="group"><div class="glabel"><b>Thread in CAD</b></div>
+          <div class="seg" id="threadSeg"><button id="thPlain" aria-pressed="true">Cosmetic</button><button id="thHelix" aria-pressed="false">Modelled helix</button></div>
+          <p class="hint" id="threadHint"></p>
+        </div>
+      </aside>
+
+      <section class="main">
+        <div class="sheetbox">
+          <div class="sheethead"><div><div class="eyebrow" id="eyebrow"></div><h2 id="desig"></h2></div><div class="acts"><button class="btn" id="dlSvg">Save drawing</button></div></div>
+          <div id="warnBox" class="warn" hidden></div>
+          <div id="sheet" role="img" aria-label="Dimensioned engineering drawing"></div>
+        </div>
+
+        <div class="bench">
+          <div class="card">
+            <h3>CAD model <span class="live" id="live"><i></i><span id="liveTxt">Up to date</span></span></h3>
+            <div class="viewer" id="viewer">
+              <canvas id="cv"></canvas>
+              <div class="tip">Drag to rotate · scroll to zoom · double-click to reset</div>
+              <div class="busy" id="busy" hidden></div>
+            </div>
+            <div class="stats" id="stats"></div>
+            <div class="cadbar">
+              <button class="btn primary" id="dlZip" disabled>Download STEP + STL</button>
+              <span class="dl-msg" id="dlMsg"></span>
+            </div>
+            <p class="notes">STEP files are AP214 faceted B-rep solids in millimetres, which SolidWorks, Fusion, Onshape, FreeCAD and Inventor import as closed solid bodies. The origin sits on the screw axis at the length reference plane: under the head, or on the top face for countersunk heads. +Z points toward the head.</p>
+          </div>
+          <div class="card">
+            <h3>Dimensions</h3>
+            <table class="spec" id="spec"></table>
+            <p class="notes" id="specNote"></p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="gut">
+  <div class="in">
+    <span class="made">Made by <a href="https://www.instagram.com/underdogbuilder/" target="_blank" rel="noopener">@underdogbuilder</a></span>
+    <span>Dimensions from ISO 4762, 7380-1, 10642, 2009, 7046-1, 14581, 1580, 7045, 14583, 1207, 14580, 14579 and 4017.</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Screw geometry kernel: ISO data, solid mesh builder, STL/STEP/ZIP writers.
+(function (G) {
+'use strict';
+const D2R = Math.PI / 180, TAU = Math.PI * 2;
+
+// ---------- Standards data (mm) ----------
+const SIZES = [1.6, 2, 2.5, 3, 4, 5, 6, 8, 10, 12];
+const COARSE = { 1.6: .35, 2: .4, 2.5: .45, 3: .5, 4: .7, 5: .8, 6: 1, 8: 1.25, 10: 1.5, 12: 1.75 };
+const FINE = { 1.6: [.2], 2: [.25], 2.5: [.35], 3: [.35], 4: [.5], 5: [.5], 6: [.75], 8: [1, .75], 10: [1.25, 1, .75], 12: [1.5, 1.25, 1] };
+const ISO888 = [2, 2.5, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 22, 25, 28, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90, 100, 110, 120];
+const TORX_A = { T6: 1.75, T8: 2.4, T10: 2.8, T15: 3.35, T20: 3.95, T25: 4.5, T30: 5.6, T40: 6.75, T45: 7.95, T50: 8.95, T55: 11.35 };
+const MS = [1.6, 2, 2.5, 3, 4, 5, 6, 8, 10];
+const zipObj = (keys, rows) => Object.fromEntries(keys.map((k, i) => [k, rows[i]]));
+const machineB = d => (d <= 3 ? 25 : 38);
+const machineLen = { 1.6: [2, 16], 2: [3, 20], 2.5: [3, 25], 3: [4, 30], 4: [5, 40], 5: [6, 50], 6: [8, 60], 8: [10, 80], 10: [12, 80] };
+
+// head: cap | button | csks | cskf | pan | cheese | hex ; drive: hex | torx | ph | pz | slot | none
+const STD = {
+  'ISO 4762': { title: 'Hexagon socket head cap screw', head: 'cap', drives: ['hex'], fineStd: 'ISO 12474', fineFrom: 8,
+    len: { 1.6: [2.5, 16], 2: [3, 20], 2.5: [4, 25], 3: [5, 30], 4: [6, 40], 5: [8, 50], 6: [10, 60], 8: [12, 80], 10: [16, 100], 12: [20, 120] },
+    data: zipObj(SIZES, [[3, 1.6, 1.5, .7, 15], [3.8, 2, 1.5, 1, 16], [4.5, 2.5, 2, 1.1, 17], [5.5, 3, 2.5, 1.3, 18], [7, 4, 3, 2, 20], [8.5, 5, 4, 2.5, 22], [10, 6, 5, 3, 24], [13, 8, 6, 4, 28], [16, 10, 8, 5, 32], [18, 12, 10, 6, 36]].map(([dk, k, s, t, b]) => ({ dk, k, key: s, t, b }))) },
+  'ISO 14579': { title: 'Hexalobular socket head cap screw', head: 'cap', drives: ['torx'],
+    len: { 2: [3, 20], 2.5: [4, 25], 3: [5, 30], 4: [6, 40], 5: [8, 50], 6: [10, 60], 8: [12, 80], 10: [16, 100], 12: [20, 120] },
+    data: zipObj([2, 2.5, 3, 4, 5, 6, 8, 10, 12], [[3.8, 2, 'T6', .78, 16], [4.5, 2.5, 'T8', .98, 17], [5.5, 3, 'T10', 1.14, 18], [7, 4, 'T20', 1.61, 20], [8.5, 5, 'T25', 1.84, 22], [10, 6, 'T30', 2.22, 24], [13, 8, 'T45', 3.12, 28], [16, 10, 'T50', 3.82, 32], [18, 12, 'T55', 5.02, 36]].map(([dk, k, key, t, b]) => ({ dk, k, key, t, b }))) },
+  'ISO 7380-1': { title: 'Hexagon socket button head screw', head: 'button', drives: ['hex'], full: true,
+    len: { 3: [4, 30], 4: [5, 40], 5: [6, 50], 6: [8, 60], 8: [10, 80], 10: [12, 80], 12: [16, 80] },
+    data: zipObj([3, 4, 5, 6, 8, 10, 12], [[5.7, 1.65, 2, 1.04], [7.6, 2.2, 2.5, 1.3], [9.5, 2.75, 3, 1.56], [10.5, 3.3, 4, 2.08], [14, 4.4, 5, 2.6], [17.5, 5.5, 6, 3.12], [21, 6.6, 8, 4.16]].map(([dk, k, key, t]) => ({ dk, k, key, t }))) },
+  'ISO 10642': { title: 'Hexagon socket countersunk head screw', head: 'csks', drives: ['hex'],
+    len: { 3: [8, 30], 4: [8, 40], 5: [8, 50], 6: [8, 60], 8: [10, 80], 10: [12, 100], 12: [20, 100] },
+    data: zipObj([3, 4, 5, 6, 8, 10, 12], [[6.72, 1.86, 2, 1.1, 18], [8.96, 2.48, 2.5, 1.5, 20], [11.2, 3.1, 3, 1.9, 22], [13.44, 3.72, 4, 2.2, 24], [17.92, 4.96, 5, 3, 28], [22.4, 6.2, 6, 3.6, 32], [26.88, 7.44, 8, 4.3, 36]].map(([dk, k, key, t, b]) => ({ dk, k, key, t, b }))) },
+  'ISO 2009': { title: 'Slotted countersunk flat head screw', head: 'cskf', drives: ['slot'], machine: true, len: machineLen,
+    data: zipObj(MS, [[3, 1, .4, .32], [3.8, 1.2, .5, .4], [4.7, 1.5, .6, .5], [5.5, 1.65, .8, .6], [8.4, 2.7, 1.2, 1], [9.3, 2.7, 1.2, 1.1], [11.3, 3.3, 1.6, 1.2], [15.8, 4.65, 2, 1.8], [18.3, 5, 2.5, 2]].map(([dk, k, n, t]) => ({ dk, k, key: n, t }))) },
+  'ISO 7046-1': { title: 'Cross recessed countersunk flat head screw', head: 'cskf', drives: ['ph', 'pz'], machine: true, len: machineLen,
+    data: zipObj(MS, [[3, 1, 0, 1.6, 1.6], [3.8, 1.2, 0, 1.9, 1.9], [4.7, 1.5, 1, 2.9, 2.8], [5.5, 1.65, 1, 3.2, 3], [8.4, 2.7, 2, 4.6, 4.4], [9.3, 2.7, 2, 5.2, 4.9], [11.3, 3.3, 3, 6.8, 6.6], [15.8, 4.65, 4, 8.9, 8.8], [18.3, 5, 4, 10, 9.8]].map(([dk, k, no, mH, mZ]) => ({ dk, k, no, mH, mZ }))) },
+  'ISO 14581': { title: 'Hexalobular socket countersunk flat head screw', head: 'cskf', drives: ['torx'], machine: true, len: machineLen,
+    data: zipObj([2, 2.5, 3, 4, 5, 6, 8, 10], [[3.8, 1.2, 'T6', .58], [4.7, 1.5, 'T8', .72], [5.5, 1.65, 'T10', .77], [8.4, 2.7, 'T20', 1.33], [9.3, 2.7, 'T25', 1.31], [11.3, 3.3, 'T30', 1.58], [15.8, 4.65, 'T45', 2.35], [18.3, 5, 'T50', 2.6]].map(([dk, k, key, t]) => ({ dk, k, key, t }))) },
+  'ISO 1580': { title: 'Slotted pan head screw', head: 'pan', drives: ['slot'], machine: true, len: machineLen,
+    data: zipObj(MS, [[3.2, 1, .4, .35], [4, 1.3, .5, .5], [5, 1.5, .6, .6], [5.6, 1.8, .8, .7], [8, 2.4, 1.2, 1], [9.5, 3, 1.2, 1.2], [12, 3.6, 1.6, 1.4], [16, 4.8, 2, 1.9], [20, 6, 2.5, 2.4]].map(([dk, k, n, t]) => ({ dk, k, key: n, t }))) },
+  'ISO 7045': { title: 'Cross recessed pan head screw', head: 'pan', drives: ['ph', 'pz'], machine: true, len: machineLen,
+    data: zipObj(MS, [[3.2, 1.3, 0, 1.7, 1.6], [4, 1.6, 0, 1.9, 2.1], [5, 2.1, 1, 2.7, 2.6], [5.6, 2.4, 1, 3, 2.8], [8, 3.1, 2, 4.4, 4.3], [9.5, 3.7, 2, 4.9, 4.7], [12, 4.6, 3, 6.9, 6.7], [16, 6, 4, 9, 8.8], [20, 7.5, 4, 10.1, 9.9]].map(([dk, k, no, mH, mZ]) => ({ dk, k, no, mH, mZ }))) },
+  'ISO 14583': { title: 'Hexalobular socket pan head screw', head: 'pan', drives: ['torx'], machine: true, len: machineLen,
+    data: zipObj([2, 2.5, 3, 4, 5, 6, 8, 10], [[4, 1.6, 'T6', .7], [5, 2.1, 'T8', .98], [5.6, 2.4, 'T10', 1.14], [8, 3.1, 'T20', 1.47], [9.5, 3.7, 'T25', 1.72], [12, 4.6, 'T30', 2.22], [16, 6, 'T45', 2.99], [20, 7.5, 'T50', 3.82]].map(([dk, k, key, t]) => ({ dk, k, key, t }))) },
+  'ISO 1207': { title: 'Slotted cheese head screw', head: 'cheese', drives: ['slot'], machine: true, len: machineLen,
+    data: zipObj(MS, [[3, 1.1, .4, .45], [3.8, 1.4, .5, .6], [4.5, 1.8, .6, .7], [5.5, 2, .8, .85], [7, 2.6, 1.2, 1.1], [8.5, 3.3, 1.2, 1.3], [10, 3.9, 1.6, 1.6], [13, 5, 2, 2], [16, 6, 2.5, 2.4]].map(([dk, k, n, t]) => ({ dk, k, key: n, t }))) },
+  'ISO 14580': { title: 'Hexalobular socket cheese head screw', head: 'cheese', drives: ['torx'], machine: true, len: machineLen,
+    data: zipObj([2, 2.5, 3, 4, 5, 6, 8, 10], [[3.8, 1.55, 'T6', .78], [4.5, 1.85, 'T8', .85], [5.5, 2.4, 'T10', 1.14], [7, 3.1, 'T20', 1.47], [8.5, 3.65, 'T25', 1.72], [10, 4.4, 'T30', 2.1], [13, 5.8, 'T45', 2.86], [16, 6.9, 'T50', 3.24]].map(([dk, k, key, t]) => ({ dk, k, key, t }))) },
+  'ISO 4017': { title: 'Hexagon head screw, fully threaded', head: 'hex', drives: ['none'], full: true, fineStd: 'ISO 8676', fineFrom: 8,
+    len: { 1.6: [2, 16], 2: [4, 20], 2.5: [5, 25], 3: [6, 30], 4: [8, 40], 5: [10, 50], 6: [12, 60], 8: [16, 80], 10: [20, 100], 12: [25, 120] },
+    data: zipObj(SIZES, [[3.2, 1.1], [4, 1.4], [5, 1.7], [5.5, 2], [7, 2.8], [8, 3.5], [10, 4], [13, 5.3], [16, 6.4], [18, 7.5]].map(([s, k]) => ({ dk: s / Math.cos(30 * D2R), s, k, key: s }))) },
+};
+const HEADS = {
+  cap: { name: 'Socket cap', note: 'Cylindrical head' },
+  button: { name: 'Button', note: 'Low domed head' },
+  pan: { name: 'Pan', note: 'Rounded machine head' },
+  cheese: { name: 'Cheese', note: 'Tall cylindrical head' },
+  csks: { name: 'Countersunk socket', note: '90° flush, hex key' },
+  cskf: { name: 'Countersunk flat', note: '90° flush, machine' },
+  hex: { name: 'Hex head', note: 'External hexagon' },
+};
+const DRIVES = { hex: 'Hex socket', torx: 'Hexalobular (Torx)', ph: 'Phillips (H)', pz: 'Pozidriv (Z)', slot: 'Slotted', none: 'External hex' };
+
+function findStd(head, drive) {
+  for (const [id, s] of Object.entries(STD)) if (s.head === head && s.drives.includes(drive)) return id;
+  return null;
+}
+function drivesFor(head) {
+  const out = [];
+  for (const s of Object.values(STD)) if (s.head === head) for (const d of s.drives) if (!out.includes(d)) out.push(d);
+  return out;
+}
+function lengthsFor(stdId, d) {
+  const r = STD[stdId].len[d]; if (!r) return [];
+  return ISO888.filter(l => l >= r[0] - 1e-9 && l <= r[1] + 1e-9);
+}
+
+// Resolve a full spec from user choices.
+function resolve(c) {
+  const stdId = findStd(c.head, c.drive);
+  if (!stdId) return { error: 'No ISO standard combines this head and drive.' };
+  const S = STD[stdId], row = S.data[c.d];
+  if (!row) return { error: `${stdId} does not cover M${c.d}.` };
+  const P = c.pitch || COARSE[c.d], fine = Math.abs(P - COARSE[c.d]) > 1e-9;
+  const sp = { stdId, std: S, head: c.head, drive: c.drive, d: c.d, P, fine, L: c.L, helix: !!c.helix, ...row };
+  // drive geometry
+  if (c.drive === 'ph' || c.drive === 'pz') { sp.m = c.drive === 'ph' ? row.mH : row.mZ; sp.key = (c.drive === 'ph' ? 'PH' : 'PZ') + row.no; }
+  if (c.drive === 'torx') sp.A = TORX_A[row.key];
+  // designation & standard notes
+  let std = stdId, warn = null;
+  if (fine) {
+    if (S.fineStd && c.d >= S.fineFrom) std = S.fineStd;
+    else warn = `${stdId} specifies coarse pitch only; M${c.d}×${P} is a non-standard combination.`;
+  }
+  sp.designStd = std; sp.warn = warn;
+  const sz = fine ? `M${c.d}×${P}` : `M${c.d}`;
+  sp.designation = `${std} – ${sz} × ${c.L}` + (c.drive === 'ph' ? ' – H' : c.drive === 'pz' ? ' – Z' : '');
+  // thread length
+  sp.d3 = c.d - 1.22687 * P;
+  const zj = (c.head === 'csks' || c.head === 'cskf') ? -row.k : 0;
+  sp.zj = zj;
+  let b = S.full ? Infinity : (S.machine ? machineB(c.d) : row.b);
+  const shankLen = c.L + zj; // length below head
+  sp.fullThread = shankLen <= b + 1e-9;
+  sp.threadLen = sp.fullThread ? shankLen : b;
+  sp.zThread = sp.fullThread ? zj - Math.min(1.5 * P, 0.25 * shankLen) : -c.L + b;
+  return sp;
+}
+
+// ---------- 2D shape radial functions ----------
+function polyRadial(poly) { // star-shaped polygon about origin -> R(theta)
+  return th => {
+    const dx = Math.cos(th), dy = Math.sin(th); let best = 0;
+    for (let i = 0; i < poly.length; i++) {
+      const [x1, y1] = poly[i], [x2, y2] = poly[(i + 1) % poly.length];
+      const ex = x2 - x1, ey = y2 - y1, den = dx * ey - dy * ex;
+      if (Math.abs(den) < 1e-14) continue;
+      const t = (x1 * ey - y1 * ex) / den, u = (x1 * dy - y1 * dx) / den;
+      if (t > 0 && u >= -1e-9 && u <= 1 + 1e-9 && t > best) best = t;
+    }
+    return best;
+  };
+}
+function hexPoly(s, rot = 0) { const r = s / Math.sqrt(3); return [0, 1, 2, 3, 4, 5].map(i => [r * Math.cos(i * Math.PI / 3 + rot), r * Math.sin(i * Math.PI / 3 + rot)]); }
+function crossPoly(span, w, rot = 0) {
+  const a = span / 2, h = w / 2;
+  const pts = [[a, -h], [a, h], [h, h], [h, a], [-h, a], [-h, h], [-a, h], [-a, -h], [-h, -h], [-h, -a], [h, -a], [h, -h]];
+  const c = Math.cos(rot), s = Math.sin(rot);
+  return pts.map(([x, y]) => [x * c - y * s, x * s + y * c]);
+}
+function torxPoly(A, seg = 10) {
+  const re = 0.1 * A, ri = 0.175 * A, B = 0.72 * A;
+  const co = k => { const a = k * Math.PI / 3, r = A / 2 - re; return [r * Math.cos(a), r * Math.sin(a)]; };
+  const ci = k => { const a = k * Math.PI / 3 + Math.PI / 6, r = B / 2 + ri; return [r * Math.cos(a), r * Math.sin(a)]; };
+  const tang = (o, i) => { const dx = i[0] - o[0], dy = i[1] - o[1], L = Math.hypot(dx, dy); return [o[0] + re * dx / L, o[1] + re * dy / L]; };
+  const arc = (c, r, p1, p2, ref, out) => {
+    let a1 = Math.atan2(p1[1] - c[1], p1[0] - c[0]), a2 = Math.atan2(p2[1] - c[1], p2[0] - c[0]);
+    let sw = a2 - a1; while (sw <= -Math.PI) sw += TAU; while (sw > Math.PI) sw -= TAU;
+    const mid = a1 + sw / 2, rd = Math.atan2(ref[1], ref[0]);
+    let dm = Math.abs(((mid - rd) % TAU + TAU + Math.PI) % TAU - Math.PI);
+    if (dm > Math.PI / 2) sw = sw > 0 ? sw - TAU : sw + TAU;
+    for (let j = 0; j < seg; j++) { const a = a1 + sw * j / seg; out.push([c[0] + r * Math.cos(a), c[1] + r * Math.sin(a)]); }
+  };
+  const pts = [];
+  for (let k = 0; k < 6; k++) {
+    const o = co(k), iPrev = ci(k - 1), iNext = ci(k), oNext = co(k + 1);
+    arc(o, re, tang(o, iPrev), tang(o, iNext), o, pts);
+    arc(iNext, ri, tang(o, iNext), tang(oNext, iNext), [-iNext[0], -iNext[1]], pts);
+  }
+  return pts;
+}
+
+// Drive description: radial function at top + rings below + corner angles
+function driveModel(sp, zt) {
+  const dv = sp.drive;
+  if (dv === 'hex') {
+    const s = sp.key, poly = hexPoly(s), R = polyRadial(poly), e2 = s / Math.sqrt(3);
+    return { R, rmax: e2, corners: [0, 1, 2, 3, 4, 5].map(i => i * Math.PI / 3), outline: poly,
+      rings: th => [[0, zt - sp.t - e2 * 0.6], [R(th), zt - sp.t]], depth: sp.t, label: `s ${s}` };
+  }
+  if (dv === 'torx') {
+    const poly = torxPoly(sp.A), R = polyRadial(poly);
+    return { R, rmax: sp.A / 2, corners: [], outline: poly, rings: th => [[0, zt - sp.t - sp.A * 0.12], [R(th), zt - sp.t]], depth: sp.t, label: sp.key };
+  }
+  if (dv === 'ph' || dv === 'pz') {
+    const m = sp.m, w = 0.2 * m + 0.25 * Math.sqrt(m);
+    let p1 = crossPoly(m, w), p2 = crossPoly(0.42 * m, 0.7 * w);
+    let R1 = polyRadial(p1), R2 = polyRadial(p2), outline = p1, corners = p1.map(([x, y]) => Math.atan2(y, x));
+    if (dv === 'pz') {
+      const q1 = crossPoly(0.62 * m, 0.1 * m, Math.PI / 4), Q1 = polyRadial(q1), q2 = crossPoly(0.3 * m, 0.08 * m, Math.PI / 4), Q2 = polyRadial(q2);
+      const a = R1, b = R2; R1 = th => Math.max(a(th), Q1(th)); R2 = th => Math.max(b(th), Q2(th));
+      corners = corners.concat(q1.map(([x, y]) => Math.atan2(y, x)));
+      outline = null; // composite outline sampled
+    }
+    const tt = 0.6 * m;
+    return { R: R1, rmax: m / 2, corners, outline, rings: th => [[0, zt - tt], [R2(th), zt - 0.55 * tt]], depth: tt, label: sp.key };
+  }
+  if (dv === 'slot') return { slot: true, n: sp.key, depth: sp.t * 1.15, label: `n ${sp.key}` };
+  return { none: true, label: '' };
+}
+
+// Head meridian profile P(theta): polyline [r,z] from (0,zt) to junction (d/2, zj)
+function headProfile(sp, dm) {
+  const { dk, k, d } = sp, hd = sp.head, r0 = d / 2;
+  if (hd === 'cap' || hd === 'cheese') {
+    const c = Math.min(0.06 * dk, 0.25 * k);
+    return () => [[0, k], [dk / 2 - c, k], [dk / 2, k - c], [dk / 2, 0], [r0, 0]];
+  }
+  if (hd === 'button' || hd === 'pan') {
+    const rim = hd === 'button' ? 0.16 * k : 0.48 * k;
+    const need = dm.rmax ? dm.rmax * 1.22 : (dm.slot ? 0 : 0);
+    const rp = Math.min(Math.max(hd === 'button' ? 0.3 * dk : 0.36 * dk, need), 0.44 * dk);
+    const pts = [[0, k], [rp, k]], a = dk / 2 - rp, b = k - rim;
+    for (let i = 1; i <= 10; i++) { const f = i / 10 * Math.PI / 2; pts.push([rp + a * Math.sin(f), rim + b * Math.cos(f)]); }
+    pts.push([dk / 2, 0], [r0, 0]);
+    return () => pts;
+  }
+  if (hd === 'csks' || hd === 'cskf') {
+    let ze = -k + (dk - d) / 2; if (ze > 0) ze = 0;
+    const pts = [[0, 0], [dk / 2, 0]]; if (ze < -1e-6) pts.push([dk / 2, ze]); pts.push([r0, -k]);
+    return () => pts;
+  }
+  if (hd === 'hex') {
+    const s = sp.s, R = polyRadial(hexPoly(s, Math.PI / 6)), rch = 0.475 * s, t30 = Math.tan(30 * D2R);
+    return th => { const r = R(th); return [[0, k], [Math.min(rch, r), k], [r, k - Math.max(0, r - rch) * t30], [r, 0], [r0, 0]]; };
+  }
+}
+
+// Clamp profile P so it starts at point W lying at parameter (seg i, frac f)
+function clampProfile(P, seg, W) {
+  const out = [];
+  for (let j = 0; j < P.length; j++) out.push(j <= seg ? W : P[j]);
+  return out;
+}
+function pointAtR(P, r, limitSeg) { // on increasing-r segments before limitSeg
+  for (let i = 0; i < Math.min(P.length - 1, limitSeg + 1); i++) {
+    const [r1, z1] = P[i], [r2, z2] = P[i + 1];
+    if (r2 - r1 > 1e-12 && r >= r1 - 1e-12 && r <= r2 + 1e-12) { const f = (r - r1) / (r2 - r1); return { seg: i, p: [r, z1 + f * (z2 - z1)] }; }
+  }
+  return null;
+}
+
+function headMeridian(sp, dm, Pf, th) {
+  const P = Pf(th);
+  if (dm.none) return P.slice();
+  if (dm.slot) {
+    const zf = P[0][1] - dm.depth;
+    // crossing of P below zf
+    let cs = -1, cp = null;
+    for (let i = 0; i < P.length - 1; i++) {
+      const [r1, z1] = P[i], [r2, z2] = P[i + 1];
+      if (z1 >= zf && z2 < zf) { const f = (z1 - zf) / (z1 - z2); cs = i; cp = [r1 + f * (r2 - r1), zf]; break; }
+    }
+    const c = Math.abs(Math.cos(th)), rs = c < 1e-9 ? 1e9 : (dm.n / 2) / c;
+    let W, seg, floorEnd;
+    const hit = rs < cp[0] - 1e-12 ? pointAtR(P, rs, cs) : null;
+    if (hit) { W = hit.p; seg = hit.seg; floorEnd = [rs, zf]; } else { W = cp; seg = cs; floorEnd = cp; }
+    return [[0, zf], floorEnd, W].concat(clampProfile(P, seg, W));
+  }
+  const rings = dm.rings(th), W = [dm.R(th), P[0][1]];
+  return rings.concat([W], clampProfile(P, 0, W));
+}
+
+function headAngles(sp, dm, Pf) {
+  const N = 192, a = [];
+  for (let i = 0; i < N; i++) a.push(i * TAU / N);
+  if (dm.corners) a.push(...dm.corners);
+  if (sp.head === 'hex') for (let i = 0; i < 6; i++) a.push(i * Math.PI / 3 + Math.PI / 6);
+  if (dm.slot) {
+    const P = Pf(0), zf = P[0][1] - dm.depth, radii = P.map(p => p[0]);
+    for (let i = 0; i < P.length - 1; i++) { const [r1, z1] = P[i], [r2, z2] = P[i + 1]; if (z1 >= zf && z2 < zf) radii.push(r1 + (z1 - zf) / (z1 - z2) * (r2 - r1)); }
+    for (const r of radii) if (r > dm.n / 2 + 1e-9) { const b = Math.acos(dm.n / 2 / r); a.push(b, Math.PI - b, Math.PI + b, TAU - b); }
+    // dense near the slot walls' outer ends
+  }
+  const norm = a.map(x => ((x % TAU) + TAU) % TAU).sort((x, y) => x - y), out = [];
+  for (const x of norm) if (!out.length || x - out[out.length - 1] > 1e-7) out.push(x);
+  if (TAU - out[out.length - 1] < 1e-7) out.pop();
+  return out;
+}
+
+// ---------- thread ----------
+function threadProfile(sp) {
+  const P = sp.P, h = 0.61343 * P, R = sp.d / 2, fl = h * Math.tan(30 * D2R) / P;
+  const u1 = 0.125, u2 = u1 + fl, u3 = u2 + (1 - u1 - 2 * fl);
+  return u => { // u in [0,1)
+    if (u < u1) return R;
+    if (u < u2) return R - h * (u - u1) / fl;
+    if (u < u3) return R - h;
+    return R - h + h * (u - u3) / fl;
+  };
+}
+
+// ---------- mesh builder ----------
+function buildMesh(sp) {
+  const dm = driveModel(sp, sp.head === 'csks' || sp.head === 'cskf' ? 0 : sp.k);
+  const Pf = headProfile(sp, dm);
+  const angs = headAngles(sp, dm, Pf);
+  const pos = [], tris = [];
+  const V = (x, y, z) => (pos.push(x, y, z), pos.length / 3 - 1);
+  // head polar mesh
+  const grid = angs.map(th => headMeridian(sp, dm, Pf, th).map(([r, z]) => V(r * Math.cos(th), r * Math.sin(th), z)));
+  const M = grid[0].length;
+  for (const g of grid) if (g.length !== M) throw new Error('meridian count mismatch');
+  const quadStrip = (A, B) => { for (let j = 0; j < A.length - 1; j++) { tris.push(A[j], B[j], B[j + 1]); tris.push(A[j], B[j + 1], A[j + 1]); } };
+  for (let i = 0; i < grid.length; i++) quadStrip(grid[i], grid[(i + 1) % grid.length]);
+  const headRing = grid.map(g => g[M - 1]);
+  // shank
+  const r0 = sp.d / 2, L = sp.L, P = sp.P, zj = sp.zj;
+  const Ns = sp.helix ? Math.max(48, Math.min(72, Math.round(sp.d * 9))) : 96;
+  const sAng = []; for (let i = 0; i < Ns; i++) sAng.push(i * TAU / Ns);
+  const dlt = Math.min(0.05 * sp.d, 0.3 * P);
+  const rows = []; // each row: function th->r, z
+  rows.push({ z: zj - dlt, r: () => r0 });
+  const rMinor = r0 - 0.61343 * P, rTip = rMinor - 0.05 * P;
+  if (!sp.helix) {
+    const c = r0 - rTip;
+    rows.push({ z: -L + c, r: () => r0 }, { z: -L, r: () => rTip });
+  } else {
+    const prof = threadProfile(sp), zs = Math.min(sp.zThread, zj - dlt - 1e-3);
+    if (zs < zj - dlt - 1e-6) rows.push({ z: zs, r: () => r0 });
+    const dz = P / 12, n = Math.max(2, Math.ceil((zs + L) / dz));
+    for (let i = 1; i <= n; i++) {
+      const z = zs - (zs + L) * i / n;
+      rows.push({ z, r: th => {
+        let u = (z / P - th / TAU) % 1; if (u < 0) u += 1;
+        const s = Math.min(1, Math.max(0, (zs - z) / (1.5 * P)));
+        let r = r0 - s * (r0 - prof(u));
+        return Math.min(r, rTip + (z + L));
+      } });
+    }
+  }
+  const sGrid = sAng.map(th => rows.map(rw => { const r = rw.r(th); return V(r * Math.cos(th), r * Math.sin(th), rw.z); }));
+  const tipC = V(0, 0, -L);
+  sGrid.forEach(g => g.push(tipC));
+  for (let i = 0; i < Ns; i++) quadStrip(sGrid[i], sGrid[(i + 1) % Ns]);
+  // stitch headRing (angs) to shank first ring (sAng)
+  const sRing = sGrid.map(g => g[0]);
+  { let i = 0, j = 0; const nA = angs.length;
+    while (i < nA || j < Ns) {
+      const aNext = i < nA ? (i + 1 < nA ? angs[i + 1] : TAU) : Infinity;
+      const bNext = j < Ns ? (j + 1 < Ns ? sAng[j + 1] : TAU) : Infinity;
+      if (aNext <= bNext && i < nA) { tris.push(headRing[i % nA], headRing[(i + 1) % nA], sRing[j % Ns]); i++; }
+      else { tris.push(headRing[i % nA], sRing[(j + 1) % Ns], sRing[j % Ns]); j++; }
+    }
+  }
+  return finalize(pos, tris);
+}
+
+function finalize(pos, tris) {
+  const map = new Map(), np = [], remap = new Int32Array(pos.length / 3);
+  const q = v => Math.round(v * 1e6);
+  for (let i = 0; i < pos.length / 3; i++) {
+    const key = q(pos[3 * i]) + ',' + q(pos[3 * i + 1]) + ',' + q(pos[3 * i + 2]);
+    let id = map.get(key); if (id === undefined) { id = np.length / 3; map.set(key, id); np.push(pos[3 * i], pos[3 * i + 1], pos[3 * i + 2]); }
+    remap[i] = id;
+  }
+  const nt = [];
+  for (let t = 0; t < tris.length; t += 3) {
+    const a = remap[tris[t]], b = remap[tris[t + 1]], c = remap[tris[t + 2]];
+    if (a === b || b === c || a === c) continue;
+    const ux = np[3 * b] - np[3 * a], uy = np[3 * b + 1] - np[3 * a + 1], uz = np[3 * b + 2] - np[3 * a + 2];
+    const vx = np[3 * c] - np[3 * a], vy = np[3 * c + 1] - np[3 * a + 1], vz = np[3 * c + 2] - np[3 * a + 2];
+    const cx = uy * vz - uz * vy, cy = uz * vx - ux * vz, cz = ux * vy - uy * vx;
+    if (cx * cx + cy * cy + cz * cz < 1e-22) continue;
+    nt.push(a, b, c);
+  }
+  // signed volume -> orientation
+  let vol = 0;
+  for (let t = 0; t < nt.length; t += 3) {
+    const a = 3 * nt[t], b = 3 * nt[t + 1], c = 3 * nt[t + 2];
+    vol += (np[a] * (np[b + 1] * np[c + 2] - np[b + 2] * np[c + 1]) - np[a + 1] * (np[b] * np[c + 2] - np[b + 2] * np[c]) + np[a + 2] * (np[b] * np[c + 1] - np[b + 1] * np[c])) / 6;
+  }
+  if (vol < 0) { for (let t = 0; t < nt.length; t += 3) { const x = nt[t + 1]; nt[t + 1] = nt[t + 2]; nt[t + 2] = x; } vol = -vol; }
+  return { pos: new Float64Array(np), idx: new Uint32Array(nt), volume: vol };
+}
+
+function checkManifold(mesh) {
+  const e = new Map(), I = mesh.idx;
+  for (let t = 0; t < I.length; t += 3) for (let k = 0; k < 3; k++) {
+    const a = I[t + k], b = I[t + (k + 1) % 3], key = a < b ? a + '_' + b : b + '_' + a;
+    const v = e.get(key) || { n: 0, d: 0 }; v.n++; v.d += a < b ? 1 : -1; e.set(key, v);
+  }
+  let bad = 0, flip = 0; for (const v of e.values()) { if (v.n !== 2) bad++; else if (v.d !== 0) flip++; }
+  return { edges: e.size, nonManifold: bad, misoriented: flip };
+}
+
+// ---------- exporters ----------
+function toSTL(mesh, name) {
+  const I = mesh.idx, p = mesh.pos, n = I.length / 3, buf = new ArrayBuffer(84 + 50 * n), dv = new DataView(buf);
+  const hdr = ('Screw Studio ' + name).slice(0, 79); for (let i = 0; i < hdr.length; i++) dv.setUint8(i, hdr.charCodeAt(i) & 127);
+  dv.setUint32(80, n, true); let o = 84;
+  for (let t = 0; t < I.length; t += 3) {
+    const a = 3 * I[t], b = 3 * I[t + 1], c = 3 * I[t + 2];
+    const ux = p[b] - p[a], uy = p[b + 1] - p[a + 1], uz = p[b + 2] - p[a + 2], vx = p[c] - p[a], vy = p[c + 1] - p[a + 1], vz = p[c + 2] - p[a + 2];
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx; const l = Math.hypot(nx, ny, nz) || 1;
+    dv.setFloat32(o, nx / l, true); dv.setFloat32(o + 4, ny / l, true); dv.setFloat32(o + 8, nz / l, true); o += 12;
+    for (const q of [a, b, c]) { dv.setFloat32(o, p[q], true); dv.setFloat32(o + 4, p[q + 1], true); dv.setFloat32(o + 8, p[q + 2], true); o += 12; }
+    o += 2;
+  }
+  return buf;
+}
+
+// Faceted B-rep STEP (AP214). Coplanar adjacent triangle pairs are merged into quads.
+function toSTEP(mesh, meta) {
+  const I = mesh.idx, p = mesh.pos;
+  const f = v => { if (Math.abs(v) < 5e-10) return '0.'; let s = (+v.toFixed(6)).toString(); if (!/[.eE]/.test(s)) s += '.'; return s; };
+  const L = []; let id = 0; const E = s => (L.push('#' + (++id) + '=' + s + ';'), id);
+  const esc = s => String(s).replace(/'/g, "''");
+  const ctx = E("APPLICATION_CONTEXT('core data for automotive mechanical design processes')");
+  E(`APPLICATION_PROTOCOL_DEFINITION('international standard','automotive_design',2000,#${ctx})`);
+  const pc = E(`PRODUCT_CONTEXT('',#${ctx},'mechanical')`);
+  const prod = E(`PRODUCT('${esc(meta.id)}','${esc(meta.name)}','${esc(meta.desc)}',(#${pc}))`);
+  E(`PRODUCT_RELATED_PRODUCT_CATEGORY('part',$,(#${prod}))`);
+  const pdf = E(`PRODUCT_DEFINITION_FORMATION('','',#${prod})`);
+  const pdc = E(`PRODUCT_DEFINITION_CONTEXT('part definition',#${ctx},'design')`);
+  const pd = E(`PRODUCT_DEFINITION('design','',#${pdf},#${pdc})`);
+  const pds = E(`PRODUCT_DEFINITION_SHAPE('','',#${pd})`);
+  const lu = E('(LENGTH_UNIT()NAMED_UNIT(*)SI_UNIT(.MILLI.,.METRE.))');
+  const au = E('(NAMED_UNIT(*)PLANE_ANGLE_UNIT()SI_UNIT($,.RADIAN.))');
+  const su = E('(NAMED_UNIT(*)SI_UNIT($,.STERADIAN.)SOLID_ANGLE_UNIT())');
+  const um = E(`UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-06),#${lu},'distance_accuracy_value','confusion accuracy')`);
+  const rc = E(`(GEOMETRIC_REPRESENTATION_CONTEXT(3)GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#${um}))GLOBAL_UNIT_ASSIGNED_CONTEXT((#${lu},#${au},#${su}))REPRESENTATION_CONTEXT('Context3D','3D Context with 0.001 mm uncertainty'))`);
+  const o = E("CARTESIAN_POINT('',(0.,0.,0.))"), dz = E("DIRECTION('',(0.,0.,1.))"), dx = E("DIRECTION('',(1.,0.,0.))");
+  const ax = E(`AXIS2_PLACEMENT_3D('',#${o},#${dz},#${dx})`);
+  const pts = new Int32Array(p.length / 3);
+  for (let i = 0; i < pts.length; i++) pts[i] = E(`CARTESIAN_POINT('',(${f(p[3 * i])},${f(p[3 * i + 1])},${f(p[3 * i + 2])}))`);
+  // face normals & merging
+  const nT = I.length / 3, nrm = new Float64Array(nT * 3);
+  for (let t = 0; t < nT; t++) {
+    const a = 3 * I[3 * t], b = 3 * I[3 * t + 1], c = 3 * I[3 * t + 2];
+    const ux = p[b] - p[a], uy = p[b + 1] - p[a + 1], uz = p[b + 2] - p[a + 2], vx = p[c] - p[a], vy = p[c + 1] - p[a + 1], vz = p[c + 2] - p[a + 2];
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx; const l = Math.hypot(nx, ny, nz);
+    nrm[3 * t] = nx / l; nrm[3 * t + 1] = ny / l; nrm[3 * t + 2] = nz / l;
+  }
+  const edgeT = new Map();
+  for (let t = 0; t < nT; t++) for (let k = 0; k < 3; k++) edgeT.set(I[3 * t + k] + '_' + I[3 * t + (k + 1) % 3], t);
+  const used = new Uint8Array(nT), faces = [];
+  for (let t = 0; t < nT; t++) {
+    if (used[t]) continue; used[t] = 1; let loop = [I[3 * t], I[3 * t + 1], I[3 * t + 2]];
+    for (let k = 0; k < 3; k++) {
+      const a = loop[k], b = loop[(k + 1) % 3], u = edgeT.get(b + '_' + a);
+      if (u === undefined || used[u]) continue;
+      const dot = nrm[3 * t] * nrm[3 * u] + nrm[3 * t + 1] * nrm[3 * u + 1] + nrm[3 * t + 2] * nrm[3 * u + 2];
+      if (dot < 1 - 1e-10) continue;
+      const tri = [I[3 * u], I[3 * u + 1], I[3 * u + 2]], c = tri.find(v => v !== a && v !== b);
+      // convexity check of quad a,c? order: loop with c inserted between a and b
+      const q = loop.slice(0, k + 1).concat([c], loop.slice(k + 1));
+      if (!convexQuad(q, p, [nrm[3 * t], nrm[3 * t + 1], nrm[3 * t + 2]])) continue;
+      used[u] = 1; loop = q; break;
+    }
+    faces.push({ loop, n: [nrm[3 * t], nrm[3 * t + 1], nrm[3 * t + 2]] });
+  }
+  const fids = [];
+  for (const F of faces) {
+    const pl = E(`POLY_LOOP('',(${F.loop.map(v => '#' + pts[v]).join(',')}))`);
+    const fb = E(`FACE_OUTER_BOUND('',#${pl},.T.)`);
+    const [nx, ny, nz] = F.n; let rx = 1, ry = 0, rz = 0; if (Math.abs(nx) > 0.9) { rx = 0; ry = 1; }
+    let xx = ry * nz - rz * ny, xy = rz * nx - rx * nz, xz = rx * ny - ry * nx; const xl = Math.hypot(xx, xy, xz); xx /= xl; xy /= xl; xz /= xl;
+    const nd = E(`DIRECTION('',(${f(nx)},${f(ny)},${f(nz)}))`), rd = E(`DIRECTION('',(${f(xx)},${f(xy)},${f(xz)}))`);
+    const a2 = E(`AXIS2_PLACEMENT_3D('',#${pts[F.loop[0]]},#${nd},#${rd})`), plane = E(`PLANE('',#${a2})`);
+    fids.push(E(`FACE_SURFACE('',(#${fb}),#${plane},.T.)`));
+  }
+  const shell = E(`CLOSED_SHELL('',(${fids.map(i => '#' + i).join(',')}))`);
+  const brep = E(`FACETED_BREP('${esc(meta.id)}',#${shell})`);
+  const rep = E(`FACETED_BREP_SHAPE_REPRESENTATION('${esc(meta.id)}',(#${ax},#${brep}),#${rc})`);
+  E(`SHAPE_DEFINITION_REPRESENTATION(#${pds},#${rep})`);
+  const ts = (meta.time || new Date().toISOString()).slice(0, 19);
+  return ['ISO-10303-21;', 'HEADER;', `FILE_DESCRIPTION(('${esc(meta.desc)}'),'2;1');`,
+    `FILE_NAME('${esc(meta.file)}','${ts}',(''),(''),'Screw Studio','Screw Studio','');`,
+    "FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));", 'ENDSEC;', 'DATA;']
+    .concat(L, ['ENDSEC;', 'END-ISO-10303-21;']).join('\n') + '\n';
+}
+function convexQuad(q, p, n) {
+  for (let i = 0; i < 4; i++) {
+    const a = 3 * q[i], b = 3 * q[(i + 1) % 4], c = 3 * q[(i + 2) % 4];
+    const ux = p[b] - p[a], uy = p[b + 1] - p[a + 1], uz = p[b + 2] - p[a + 2], vx = p[c] - p[b], vy = p[c + 1] - p[b + 1], vz = p[c + 2] - p[b + 2];
+    const cx = uy * vz - uz * vy, cy = uz * vx - ux * vz, cz = ux * vy - uy * vx;
+    if (cx * n[0] + cy * n[1] + cz * n[2] <= 1e-14) return false;
+  }
+  return true;
+}
+
+// ---------- ZIP (deflate when available) ----------
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+async function deflateRaw(u8) {
+  if (typeof CompressionStream === 'undefined') return null;
+  try { const cs = new CompressionStream('deflate-raw'); const s = new Blob([u8]).stream().pipeThrough(cs); return new Uint8Array(await new Response(s).arrayBuffer()); } catch (e) { return null; }
+}
+async function makeZip(files) { // [{name, data:Uint8Array}]
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  const now = new Date(), dt = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)), dd = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate());
+  for (const fl of files) {
+    const nm = enc.encode(fl.name), crc = crc32(fl.data); let comp = await deflateRaw(fl.data), method = 8;
+    if (!comp || comp.length >= fl.data.length) { comp = fl.data; method = 0; }
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, method, true);
+    h.setUint16(10, dt, true); h.setUint16(12, dd, true); h.setUint32(14, crc, true); h.setUint32(18, comp.length, true); h.setUint32(22, fl.data.length, true);
+    h.setUint16(26, nm.length, true); h.setUint16(28, 0, true);
+    parts.push(new Uint8Array(h.buffer), nm, comp);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, method, true);
+    c.setUint16(12, dt, true); c.setUint16(14, dd, true); c.setUint32(16, crc, true); c.setUint32(20, comp.length, true); c.setUint32(24, fl.data.length, true);
+    c.setUint16(28, nm.length, true); c.setUint32(42, off, true);
+    central.push(new Uint8Array(c.buffer), nm);
+    off += 30 + nm.length + comp.length;
+  }
+  const cdSize = central.reduce((s, a) => s + a.length, 0), end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cdSize, true); end.setUint32(16, off, true);
+  return new Blob([...parts, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
+}
+
+G.ScrewKit = { SIZES, COARSE, FINE, ISO888, STD, HEADS, DRIVES, TORX_A, findStd, drivesFor, lengthsFor, resolve,
+  driveModel, headProfile, headMeridian, threadProfile, polyRadial, hexPoly, buildMesh, checkManifold, toSTL, toSTEP, makeZip, crc32 };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function(){
+'use strict';
+const K = window.ScrewKit, $ = id => document.getElementById(id);
+const fmt = (v, n = 2) => (Math.round(v * 10 ** n) / 10 ** n).toString();
+const state = { head: 'cap', drive: 'hex', d: 5, pitch: 0.8, L: 16, helix: false };
+let sp = null, built = null, cad = null, lastSig = '';
+const sig = s => JSON.stringify([s.head, s.drive, s.d, s.pitch, s.L, s.helix]);
+
+/* ---------- validity helpers ---------- */
+const stdFor = (h, dv) => K.findStd(h, dv);
+const sizesFor = (h, dv) => { const id = stdFor(h, dv); return id ? Object.keys(K.STD[id].data).map(Number) : []; };
+function normalize() {
+  const dv = K.drivesFor(state.head); if (!dv.includes(state.drive)) state.drive = dv[0];
+  const ss = sizesFor(state.head, state.drive);
+  if (!ss.includes(state.d)) state.d = ss.reduce((a, b) => Math.abs(b - state.d) < Math.abs(a - state.d) ? b : a);
+  const ps = [K.COARSE[state.d], ...K.FINE[state.d]];
+  if (!ps.some(p => Math.abs(p - state.pitch) < 1e-9)) state.pitch = K.COARSE[state.d];
+  const ls = K.lengthsFor(stdFor(state.head, state.drive), state.d);
+  if (!ls.includes(state.L)) state.L = ls.reduce((a, b) => Math.abs(b - state.L) < Math.abs(a - state.L) ? b : a);
+}
+
+/* ---------- small icons ---------- */
+function headIcon(h) {
+  const rep = { cap: ['hex'], button: ['hex'], pan: ['ph'], cheese: ['slot'], csks: ['hex'], cskf: ['ph'], hex: ['none'] }[h];
+  const s = K.resolve({ head: h, drive: rep[0], d: 6, L: 10 });
+  const dm = K.driveModel(s, 0), P = K.headProfile(s, dm)(h === 'hex' ? Math.PI / 6 : 0);
+  const zt = h === 'csks' || h === 'cskf' ? 0 : s.k, shank = 7, sc = Math.min(36 / s.dk, 30 / (s.k + shank));
+  const pts = P.concat([[s.d / 2, s.zj - shank], [0, s.zj - shank]]);
+  const y0 = (34 - (zt - (s.zj - shank)) * sc) / 2;
+  const right = pts.map(([r, z]) => `${(20 + r * sc).toFixed(1)},${(y0 + (zt - z) * sc).toFixed(1)}`);
+  const left = pts.slice().reverse().map(([r, z]) => `${(20 - r * sc).toFixed(1)},${(y0 + (zt - z) * sc).toFixed(1)}`);
+  return `<svg viewBox="0 0 40 34" aria-hidden="true"><polygon points="${right.concat(left).join(' ')}" fill="var(--steel)" stroke="var(--ink)" stroke-width="1"/></svg>`;
+}
+function driveIcon(dv) {
+  const g = (d) => `<svg viewBox="-11 -11 22 22" aria-hidden="true"><circle r="10" fill="var(--steel)" stroke="var(--ink)" stroke-width="1"/>${d}</svg>`;
+  const poly = p => `<polygon points="${p.map(([x, y]) => `${x.toFixed(2)},${(-y).toFixed(2)}`).join(' ')}" fill="var(--sheet)" stroke="var(--ink)" stroke-width=".9"/>`;
+  if (dv === 'hex') return g(poly(K.hexPoly(9)));
+  if (dv === 'torx') { const s = K.resolve({ head: 'cap', drive: 'torx', d: 6, L: 10 }); const dm = K.driveModel(s, 0); return g(poly(dm.outline.map(([x, y]) => [x * 2.7, y * 2.7]))); }
+  if (dv === 'ph' || dv === 'pz') { const s = K.resolve({ head: 'pan', drive: dv, d: 6, L: 10 }); const dm = K.driveModel(s, 0); const p = []; for (let i = 0; i < 240; i++) { const a = i / 240 * Math.PI * 2, r = dm.R(a) * 2.4; p.push([r * Math.cos(a), r * Math.sin(a)]); } return g(poly(p)); }
+  if (dv === 'slot') return g(`<rect x="-10" y="-1.6" width="20" height="3.2" fill="var(--sheet)" stroke="var(--ink)" stroke-width=".9"/>`);
+  return `<svg viewBox="-11 -11 22 22" aria-hidden="true"><polygon points="${K.hexPoly(18.5, Math.PI / 6).map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' ')}" fill="var(--steel)" stroke="var(--ink)" stroke-width=".9"/></svg>`;
+}
+
+/* ---------- controls ---------- */
+function renderControls() {
+  const H = $('heads'); H.innerHTML = '';
+  for (const [h, info] of Object.entries(K.HEADS)) {
+    const b = document.createElement('button'); b.className = 'hcard'; b.id = 'head-' + h; b.setAttribute('aria-pressed', state.head === h);
+    b.innerHTML = headIcon(h) + `<span style="min-width:0"><span class="t">${info.name}</span><br><span class="n">${info.note}</span></span>`;
+    b.onclick = () => { state.head = h; update(); }; H.appendChild(b);
+  }
+  const D = $('drives'); D.innerHTML = '';
+  for (const dv of K.drivesFor(state.head)) {
+    const b = document.createElement('button'); b.className = 'dchip'; b.id = 'drive-' + dv; b.setAttribute('aria-pressed', state.drive === dv);
+    b.innerHTML = driveIcon(dv) + `<span>${K.DRIVES[dv]}</span>`; b.onclick = () => { state.drive = dv; update(); }; D.appendChild(b);
+  }
+  const ok = sizesFor(state.head, state.drive), S = $('sizes'); S.innerHTML = '';
+  for (const d of K.SIZES) {
+    const b = document.createElement('button'); b.className = 'chip'; b.id = 'size-' + d; b.textContent = 'M' + d;
+    b.setAttribute('aria-pressed', state.d === d); b.disabled = !ok.includes(d);
+    if (b.disabled) b.title = `${stdFor(state.head, state.drive)} does not cover M${d}`;
+    b.onclick = () => { state.d = d; state.pitch = K.COARSE[d]; update(); }; S.appendChild(b);
+  }
+  $('sizeTag').textContent = `M${ok[0]}–M${ok[ok.length - 1]}`;
+  const Pp = $('pitches'); Pp.innerHTML = '';
+  const S0 = K.STD[stdFor(state.head, state.drive)];
+  for (const p of [K.COARSE[state.d], ...K.FINE[state.d]]) {
+    const coarse = p === K.COARSE[state.d], b = document.createElement('button'); b.className = 'chip'; b.id = 'pitch-' + String(p).replace('.', '_');
+    const covered = coarse || (S0.fineStd && state.d >= S0.fineFrom);
+    b.innerHTML = `P ${p}<span class="sub">${coarse ? 'coarse' : covered ? 'fine · ' + S0.fineStd : 'fine · non-std'}</span>`;
+    b.setAttribute('aria-pressed', Math.abs(state.pitch - p) < 1e-9); b.onclick = () => { state.pitch = p; update(); }; Pp.appendChild(b);
+  }
+  const ls = K.lengthsFor(stdFor(state.head, state.drive), state.d), sel = $('len');
+  sel.innerHTML = ls.map(l => `<option value="${l}" ${l === state.L ? 'selected' : ''}>${l} mm</option>`).join('');
+  $('lenTag').textContent = `ISO 888 · ${ls[0]}–${ls[ls.length - 1]} mm`;
+  $('lenDown').disabled = ls.indexOf(state.L) <= 0; $('lenUp').disabled = ls.indexOf(state.L) >= ls.length - 1;
+  $('thPlain').setAttribute('aria-pressed', !state.helix); $('thHelix').setAttribute('aria-pressed', state.helix);
+  $('threadHint').textContent = state.helix ? 'True ISO 68-1 thread profile, right-hand. Larger files, best for renders and 3D printing.' : 'Plain cylinder at major diameter, as in vendor CAD libraries. Light files, easy mating.';
+  $('stdTag').textContent = stdFor(state.head, state.drive); $('driveTag').textContent = sp && sp.drive !== 'none' ? driveKey(sp) : '';
+}
+function driveKey(s) {
+  if (s.drive === 'hex') return 's ' + s.key; if (s.drive === 'torx') return s.key; if (s.drive === 'ph' || s.drive === 'pz') return s.key; if (s.drive === 'slot') return 'n ' + s.key; return 's ' + s.s;
+}
+
+/* ---------- drawing ---------- */
+function drawSheet(s, C) {
+  const W = 940, H = 640, dm = K.driveModel(s, s.head === 'csks' || s.head === 'cskf' ? 0 : s.k), Pf = K.headProfile(s, dm);
+  const csk = s.head === 'csks' || s.head === 'cskf', zTop = csk ? 0 : s.k, isHex = s.head === 'hex';
+  const e = isHex ? s.s / Math.cos(Math.PI / 6) : s.dk, wMax = Math.max(e, s.d);
+  const hMM = zTop + s.L;
+  const ratios = [20, 10, 5, 2, 1, 0.5], base = 3.0;
+  let ratio = 0.5; for (const r of ratios) { if (hMM * r * base <= 450 && wMax * r * base <= 300) { ratio = r; break; } }
+  const sc = ratio * base, cx = 255, yTop = 82 + (450 - hMM * sc) / 2;
+  const X = r => cx + r * sc, Y = z => yTop + (zTop - z) * sc;
+  const o = [];
+  const th = 'stroke-width="2" stroke-linejoin="round"', tn = 'stroke-width="0.9"';
+  const L = (x1, y1, x2, y2, a = th, col = C.ink) => o.push(`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" ${a}/>`);
+  const T = (x, y, t, a = '') => o.push(`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" fill="${C.dim}" font-family="${C.font}" font-size="14" ${a}>${t}</text>`);
+  const arrow = (x, y, ang) => { const a = 8, w = 2.6, c = Math.cos(ang), sn = Math.sin(ang); o.push(`<polygon points="${x},${y} ${(x - a * c + w * sn).toFixed(1)},${(y - a * sn - w * c).toFixed(1)} ${(x - a * c - w * sn).toFixed(1)},${(y - a * sn + w * c).toFixed(1)}" fill="${C.dim}"/>`); };
+  const dimV = (x, y1, y2, ext1, ext2, label) => {
+    if (ext1 != null) L(ext1, y1, x + (x > ext1 ? 6 : -6), y1, tn, C.dim); if (ext2 != null) L(ext2, y2, x + (x > ext2 ? 6 : -6), y2, tn, C.dim);
+    L(x, y1, x, y2, tn, C.dim); const up = y2 < y1; arrow(x, y1, up ? Math.PI / 2 : -Math.PI / 2); arrow(x, y2, up ? -Math.PI / 2 : Math.PI / 2);
+    const ym = (y1 + y2) / 2; o.push(`<text x="${(x - 5).toFixed(1)}" y="${ym.toFixed(1)}" fill="${C.dim}" font-family="${C.font}" font-size="14" text-anchor="middle" transform="rotate(-90 ${(x - 5).toFixed(1)} ${ym.toFixed(1)})">${label}</text>`);
+  };
+  const dimH = (y, x1, x2, ey1, ey2, label) => {
+    if (ey1 != null) L(x1, ey1, x1, y - 6, tn, C.dim); if (ey2 != null) L(x2, ey2, x2, y - 6, tn, C.dim);
+    L(x1, y, x2, y, tn, C.dim); arrow(x1, y, Math.PI); arrow(x2, y, 0); T((x1 + x2) / 2, y - 5, label, 'text-anchor="middle"');
+  };
+  // frame
+  o.push(`<rect x="8" y="8" width="${W - 16}" height="${H - 16}" fill="none" stroke="${C.ink}" stroke-width="1.4"/>`);
+  // ---- front view ----
+  let head;
+  if (dm.slot) head = K.headMeridian(s, dm, Pf, 0); else head = Pf(0);
+  const rTip = s.d / 2 - 0.61343 * s.P - 0.05 * s.P, ch = s.d / 2 - rTip;
+  const shank = [[s.d / 2, s.zj], [s.d / 2, -s.L + ch], [rTip, -s.L], [0, -s.L]];
+  if (isHex) {
+    const k = s.k, hw = e / 2, q = e / 4, c = 0.12 * k;
+    const pts = [[-hw, 0], [-hw, k - c], [-q, k], [q, k], [hw, k - c], [hw, 0]];
+    o.push(`<polyline points="${pts.map(([x, z]) => X(x).toFixed(1) + ',' + Y(z).toFixed(1)).join(' ')}" fill="none" stroke="${C.ink}" ${th}/>`);
+    L(X(-hw), Y(0), X(hw), Y(0)); L(X(-q), Y(0), X(-q), Y(k)); L(X(q), Y(0), X(q), Y(k));
+    o.push(`<path d="M${X(-hw)},${Y(k - c)} Q${X(-3 * q / 2 + q / 2)},${Y(k - 2 * c)} ${X(-q)},${Y(k)} M${X(q)},${Y(k)} Q${X(3 * q / 2 - q / 2)},${Y(k - 2 * c)} ${X(hw)},${Y(k - c)} M${X(-q)},${Y(k)} Q${X(0)},${Y(k - 2.2 * c)} ${X(q)},${Y(k)}" fill="none" stroke="${C.ink}" stroke-width="1.2"/>`);
+    const sh = shank;
+    const rp = [[s.d / 2, 0]].concat(sh.slice(1)), path = rp.map(([r, z]) => `${X(r).toFixed(1)},${Y(z).toFixed(1)}`).concat(rp.slice().reverse().map(([r, z]) => `${X(-r).toFixed(1)},${Y(z).toFixed(1)}`));
+    o.push(`<polyline points="${path.join(' ')}" fill="none" stroke="${C.ink}" ${th}/>`);
+  } else {
+    const prof = head.concat(shank), right = prof.map(([r, z]) => `${X(r).toFixed(1)},${Y(z).toFixed(1)}`), left = prof.slice().reverse().map(([r, z]) => `${X(-r).toFixed(1)},${Y(z).toFixed(1)}`);
+    o.push(`<polygon points="${right.concat(left).join(' ')}" fill="${C.fill}" stroke="${C.ink}" ${th}/>`);
+    // tangent-discontinuity edges as horizontal lines
+    const P0 = dm.slot ? Pf(0) : head;
+    for (let i = 1; i < P0.length - 1; i++) {
+      const [r0, z0] = P0[i - 1], [r1, z1] = P0[i], [r2, z2] = P0[i + 1];
+      const a1 = Math.atan2(z1 - z0, r1 - r0), a2 = Math.atan2(z2 - z1, r2 - r1); let dA = Math.abs(a2 - a1); if (dA > Math.PI) dA = 2 * Math.PI - dA;
+      if (dA > 0.26 && r1 > s.d / 2 + 1e-6 && Math.abs(z1 - 0) > 1e-6) { const rr = dm.slot ? Math.min(r1, Infinity) : r1; if (dm.slot) { L(X(-rr), Y(z1), X(-dm.n / 2), Y(z1), 'stroke-width="1.2"'); L(X(dm.n / 2), Y(z1), X(rr), Y(z1), 'stroke-width="1.2"'); } else L(X(-rr), Y(z1), X(rr), Y(z1), 'stroke-width="1.2"'); }
+    }
+    L(X(-s.d / 2), Y(s.zj), X(s.d / 2), Y(s.zj), 'stroke-width="1.2"');
+    if (dm.slot) L(X(-dm.n / 2), Y(zTop - dm.depth), X(dm.n / 2), Y(zTop - dm.depth));
+  }
+  // hidden recess
+  if (dm.R) {
+    const side = th0 => { const rg = dm.rings(th0); return [[dm.R(th0), zTop]].concat(rg.slice().reverse()); };
+    const rr = side(0), ll = side(Math.PI);
+    const pts = rr.map(([r, z]) => `${X(r).toFixed(1)},${Y(z).toFixed(1)}`).concat(ll.slice().reverse().map(([r, z]) => `${X(-r).toFixed(1)},${Y(z).toFixed(1)}`));
+    o.push(`<polyline points="${pts.join(' ')}" fill="none" stroke="${C.ink2}" stroke-width="1.1" stroke-dasharray="5 3"/>`);
+    for (let i = 1; i < rr.length - 1; i++) L(X(-ll[i][0]), Y(rr[i][1]), X(rr[i][0]), Y(rr[i][1]), 'stroke-width="1.1" stroke-dasharray="5 3"', C.ink2);
+  }
+  // thread representation (ISO 6410)
+  const r3 = s.d3 / 2, zEndThin = -s.L + ch;
+  L(X(-r3), Y(s.zThread), X(-r3), Y(zEndThin), tn); L(X(r3), Y(s.zThread), X(r3), Y(zEndThin), tn);
+  L(X(-s.d / 2), Y(s.zThread), X(s.d / 2), Y(s.zThread));
+  L(X(-s.d / 2), Y(-s.L + ch), X(s.d / 2), Y(-s.L + ch), 'stroke-width="1.2"');
+  // centre line
+  o.push(`<line x1="${cx}" y1="${(Y(zTop) - 18).toFixed(1)}" x2="${cx}" y2="${(Y(-s.L) + 18).toFixed(1)}" stroke="${C.ink2}" stroke-width="0.8" stroke-dasharray="16 3 2 3"/>`);
+  // view arrow A
+  const ay = Y(zTop) - 52; L(cx + e / 2 * sc + 30, ay, cx + e / 2 * sc + 30, ay + 22, tn, C.ink); arrow(cx + e / 2 * sc + 30, ay + 26, Math.PI / 2);
+  o.push(`<text x="${(cx + e / 2 * sc + 40).toFixed(1)}" y="${(ay + 10).toFixed(1)}" fill="${C.ink}" font-family="${C.font}" font-size="16" font-weight="600">A</text>`);
+  // dimensions
+  const hw = Math.max(e, s.dk) / 2, xR = X(hw) + 46;
+  dimV(xR, Y(0), Y(-s.L), X(csk ? s.dk / 2 : hw) + 4, X(rTip) + 4, `L ${s.L}`);
+  if (!s.fullThread) dimV(X(s.d / 2) + 22, Y(s.zThread), Y(-s.L), X(s.d / 2) + 3, null, `b ${fmt(s.threadLen, 1)}`);
+  const xL = X(-hw) - 34; dimV(xL, csk ? Y(0) : Y(0), csk ? Y(-s.k) : Y(s.k), X(-(csk ? s.d / 2 : hw)) - 4, X(-(csk ? s.d / 2 : hw)) - 4, `k ${s.k}`);
+  dimH(Y(zTop) - 22, X(-e / 2), X(e / 2), Y(zTop) - 3, Y(zTop) - 3, isHex ? `e ${fmt(e, 2)}` : `⌀${s.dk}`);
+  // thread callout leader
+  const zl = -s.L + Math.min(0.3 * s.threadLen, 6 / sc * 3), lx = X(-s.d / 2), ly = Y(zl), tx = X(-s.d / 2) - 110, tyy = Math.min(Y(-s.L) + 30, H - 40);
+  L(lx, ly, tx + 70, tyy - 6, tn, C.dim); L(tx - 10, tyy - 6, tx + 70, tyy - 6, tn, C.dim);
+  o.push(`<circle cx="${lx}" cy="${ly}" r="2" fill="${C.dim}"/>`);
+  T(tx - 8, tyy - 11, `${s.fine ? 'M' + s.d + '×' + s.P : 'M' + s.d}-6g`);
+  // ---- plan view A ----
+  const pc = { x: 705, y: 205 }, ps = Math.min(sc, 230 / Math.max(e, s.dk));
+  const PX = x => pc.x + x * ps, PY = y => pc.y - y * ps;
+  o.push(`<text x="${pc.x}" y="54" fill="${C.ink}" font-family="${C.font}" font-size="16" font-weight="600" text-anchor="middle">A</text>`);
+  if (isHex) {
+    const hp = K.hexPoly(s.s, 0); o.push(`<polygon points="${hp.map(([x, y]) => PX(x).toFixed(1) + ',' + PY(y).toFixed(1)).join(' ')}" fill="${C.fill}" stroke="${C.ink}" ${th}/>`);
+    o.push(`<circle cx="${pc.x}" cy="${pc.y}" r="${(0.475 * s.s * ps).toFixed(1)}" fill="none" stroke="${C.ink}" stroke-width="1.1"/>`);
+    const fy = s.s / 2; L(PX(e / 2) + 8, PY(fy), PX(e / 2) + 40, PY(fy), tn, C.dim); L(PX(e / 2) + 8, PY(-fy), PX(e / 2) + 40, PY(-fy), tn, C.dim);
+    const xs = PX(e / 2) + 34; L(xs, PY(fy), xs, PY(-fy), tn, C.dim); arrow(xs, PY(fy), -Math.PI / 2); arrow(xs, PY(-fy), Math.PI / 2);
+    o.push(`<text x="${xs + 6}" y="${pc.y + 5}" fill="${C.dim}" font-family="${C.font}" font-size="14">s ${s.s}</text>`);
+  } else {
+    o.push(`<circle cx="${pc.x}" cy="${pc.y}" r="${(s.dk / 2 * ps).toFixed(1)}" fill="${C.fill}" stroke="${C.ink}" ${th}/>`);
+    if (s.head === 'cap' || s.head === 'cheese') o.push(`<circle cx="${pc.x}" cy="${pc.y}" r="${((s.dk / 2 - Math.min(0.06 * s.dk, 0.25 * s.k)) * ps).toFixed(1)}" fill="none" stroke="${C.ink}" stroke-width="1.1"/>`);
+    if (dm.slot) {
+      const R = s.dk / 2, hn = dm.n / 2, yy = Math.sqrt(R * R - hn * hn);
+      o.push(`<rect x="${PX(-hn).toFixed(1)}" y="${PY(yy).toFixed(1)}" width="${(dm.n * ps).toFixed(1)}" height="${(2 * yy * ps).toFixed(1)}" fill="${C.sheet}" stroke="${C.ink}" ${th}/>`);
+    } else if (dm.R) {
+      const p = []; for (let i = 0; i < 360; i++) { const a = i / 360 * Math.PI * 2, r = dm.R(a); p.push([r * Math.cos(a), r * Math.sin(a)]); }
+      o.push(`<polygon points="${p.map(([x, y]) => PX(x).toFixed(1) + ',' + PY(y).toFixed(1)).join(' ')}" fill="${C.sheet}" stroke="${C.ink}" ${th}/>`);
+      if (s.drive === 'ph' || s.drive === 'pz') { const q = []; const r2 = dm.rings(0); for (let i = 0; i < 360; i++) { const a = i / 360 * Math.PI * 2, r = dm.rings(a)[1][0]; q.push([r * Math.cos(a), r * Math.sin(a)]); } o.push(`<polygon points="${q.map(([x, y]) => PX(x).toFixed(1) + ',' + PY(y).toFixed(1)).join(' ')}" fill="none" stroke="${C.ink}" stroke-width="1"/>`); }
+    }
+  }
+  const cl = (Math.max(e, s.dk) / 2) * ps + 14;
+  o.push(`<line x1="${pc.x - cl}" y1="${pc.y}" x2="${pc.x + cl}" y2="${pc.y}" stroke="${C.ink2}" stroke-width="0.8" stroke-dasharray="16 3 2 3"/><line x1="${pc.x}" y1="${pc.y - cl}" x2="${pc.x}" y2="${pc.y + cl}" stroke="${C.ink2}" stroke-width="0.8" stroke-dasharray="16 3 2 3"/>`);
+  if (!isHex && s.drive !== 'none') {
+    const lab = s.drive === 'hex' ? `s ${s.key}` : s.drive === 'slot' ? `n ${s.key}` : s.key;
+    const ax0 = pc.x + (dm.slot ? dm.n / 2 : (dm.rmax || 1) * 0.7) * ps, ay0 = pc.y - (dm.slot ? s.dk * 0.18 : (dm.rmax || 1) * 0.55) * ps;
+    const bx = pc.x + Math.max(e, s.dk) / 2 * ps + 26, by = pc.y - Math.max(e, s.dk) / 2 * ps - 4;
+    L(ax0, ay0, bx, by, tn, C.dim); L(bx, by, bx + 62, by, tn, C.dim); o.push(`<circle cx="${ax0}" cy="${ay0}" r="2" fill="${C.dim}"/>`); T(bx + 3, by - 5, lab);
+    T(bx + 3, by + 15, `t ${fmt(dm.depth, 2)}`, `fill-opacity="0.85"`);
+  }
+  // ---- title block ----
+  const tbx = 520, tby = 470, tbw = W - 8 - tbx, tbh = H - 8 - tby;
+  o.push(`<rect x="${tbx}" y="${tby}" width="${tbw}" height="${tbh}" fill="${C.sheet}" stroke="${C.ink}" stroke-width="1.4"/>`);
+  const row = (y) => L(tbx, y, tbx + tbw, y, 'stroke-width="0.9"');
+  row(tby + 52); row(tby + 86); row(tby + 120);
+  L(tbx + 140, tby + 86, tbx + 140, tby + tbh, 'stroke-width="0.9"'); L(tbx + 250, tby + 86, tbx + 250, tby + tbh, 'stroke-width="0.9"');
+  const lab = (x, y, t) => o.push(`<text x="${x}" y="${y}" fill="${C.ink2}" font-family="${C.font}" font-size="10.5" letter-spacing="1">${t}</text>`);
+  const val = (x, y, t, sz = 15, w = 500) => o.push(`<text x="${x}" y="${y}" fill="${C.ink}" font-family="${C.font}" font-size="${sz}" font-weight="${w}">${t}</text>`);
+  lab(tbx + 10, tby + 16, 'DESIGNATION'); val(tbx + 10, tby + 42, s.designation, 22, 600);
+  lab(tbx + 10, tby + 68, 'TITLE'); val(tbx + 10, tby + 82, s.std.title + (s.drive === 'ph' ? ' · type H' : s.drive === 'pz' ? ' · type Z' : ''), 14);
+  lab(tbx + 10, tby + 102, 'THREAD'); val(tbx + 10, tby + 116, `M${s.d}×${s.P} · ${s.fine ? 'fine' : 'coarse'}`, 14);
+  lab(tbx + 150, tby + 102, 'DRIVE'); val(tbx + 150, tby + 116, s.drive === 'none' ? `hex s ${s.s}` : driveKey(s), 14);
+  lab(tbx + 260, tby + 102, 'SCALE · UNITS'); val(tbx + 260, tby + 116, `${ratio >= 1 ? ratio + ':1' : '1:' + 1 / ratio} · mm`, 14);
+  lab(tbx + 10, tby + 136, 'MASS (STEEL)'); val(tbx + 10, tby + 152, C.mass ? `≈ ${C.mass} g` : '—', 14);
+  lab(tbx + 150, tby + 136, 'TOLERANCE'); val(tbx + 150, tby + 152, '6g · grade A', 14);
+  lab(tbx + 260, tby + 136, 'PROJECTION');
+  // first-angle symbol
+  const sx = tbx + 345, sy = tby + 146;
+  o.push(`<g stroke="${C.ink}" stroke-width="1" fill="none"><circle cx="${sx}" cy="${sy}" r="8"/><circle cx="${sx}" cy="${sy}" r="3.5"/><polygon points="${sx - 28},${sy - 8} ${sx - 14},${sy - 4} ${sx - 14},${sy + 4} ${sx - 28},${sy + 8}"/></g>`);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" font-family="${C.font}">${C.bg ? `<rect width="${W}" height="${H}" fill="${C.bg}"/>` : ''}${o.join('')}</svg>`;
+}
+const screenColors = () => ({ ink: 'var(--ink)', ink2: 'var(--ink2)', dim: 'var(--dim)', fill: 'color-mix(in srgb, var(--steel) 22%, var(--sheet))', sheet: 'var(--sheet)', font: '-apple-system, BlinkMacSystemFont, Helvetica Neue, Helvetica, Arial, sans-serif' });
+const fileColors = () => ({ ink: '#1A211E', ink2: '#55605A', dim: '#2E5F86', fill: '#EDEFEF', sheet: '#FFFFFF', bg: '#FFFFFF', font: 'Helvetica Neue, Helvetica, Arial, sans-serif' });
+
+/* ---------- spec table ---------- */
+function renderSpec(s, massG) {
+  const rows = [];
+  const R = (sym, name, v, src) => rows.push(`<tr><td>${sym}</td><td>${name}</td><td class="v">${v}</td><td class="src">${src || ''}</td></tr>`);
+  R('d', 'Nominal thread diameter', `${s.d} mm`, 'ISO 261');
+  R('P', `Pitch (${s.fine ? 'fine' : 'coarse'})`, `${s.P} mm`, 'ISO 261');
+  R('d₃', 'Minor diameter, external', `${fmt(s.d3, 3)} mm`, 'ISO 724');
+  if (s.head === 'hex') { R('s', 'Width across flats', `${s.s} mm`, s.stdId); R('e', 'Width across corners (theoretical)', `${fmt(s.dk, 2)} mm`, s.stdId); }
+  else R('dk', 'Head diameter' + (s.head === 'csks' ? ' (theoretical)' : ''), `${s.dk} mm`, s.stdId);
+  R('k', 'Head height', `${s.k} mm`, s.stdId);
+  if (s.drive === 'hex') R('s', 'Hex socket across flats', `${s.key} mm`, s.stdId);
+  if (s.drive === 'torx') R('A', `Hexalobular ${s.key}, point to point`, `${s.A} mm`, 'ISO 10664');
+  if (s.drive === 'ph' || s.drive === 'pz') R('m', `Cross recess ${s.key}, diameter`, `${s.m} mm`, s.stdId);
+  if (s.drive === 'slot') R('n', 'Slot width', `${s.key} mm`, s.stdId);
+  if (s.t && s.drive !== 'none') R('t', 'Recess depth (min)', `${s.t} mm`, s.stdId);
+  R('l', 'Nominal length', `${s.L} mm`, 'ISO 888');
+  R('b', s.fullThread ? 'Thread length (full thread)' : 'Thread length', s.fullThread ? 'to head' : `${fmt(s.threadLen, 1)} mm`, s.std.machine ? 'ISO 7045 family' : s.std.full ? s.stdId : s.stdId);
+  if (massG) R('m', 'Mass, steel 7.85 g/cm³', `≈ ${massG} g`, 'computed');
+  $('spec').innerHTML = rows.join('');
+  $('specNote').textContent = `Head and drive values are the nominal (max) figures from ${s.stdId}. Recess shapes for cross and hexalobular drives follow the gauge geometry of ISO 4757 and ISO 10664; they are for fit and appearance, not for manufacturing tooling.`;
+}
+
+/* ---------- update cycle ---------- */
+function update() {
+  normalize();
+  sp = K.resolve(state);
+  renderControls();
+  $('desig').textContent = sp.designation;
+  const wb = $('warnBox'); if (sp.warn) { wb.hidden = false; wb.textContent = sp.warn; } else wb.hidden = true;
+  let mass = null;
+  try { const m = K.buildMesh({ ...sp, helix: false }); mass = fmt(m.volume * 7.85e-3, m.volume * 7.85e-3 < 1 ? 3 : 2); } catch (e) {}
+  sp._mass = mass;
+  $('sheet').innerHTML = drawSheet(sp, { ...screenColors(), mass });
+  renderSpec(sp, mass);
+  $('eyebrow').textContent = sp.std.title;
+  scheduleBuild();
+}
+
+/* ---------- 3D viewer ---------- */
+let R3 = null;
+function initViewer() {
+  if (!window.THREE) { $('busy').hidden = false; $('busy').textContent = '3D preview needs WebGL; downloads still work.'; return; }
+  const cv = $('cv');
+  let renderer; try { renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: false }); } catch (e) { $('busy').hidden = false; $('busy').textContent = '3D preview unavailable in this view.'; return; }
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(28, 4 / 3, 0.1, 5000);
+  scene.add(new THREE.HemisphereLight(0xf2f5f7, 0x30363a, 0.85));
+  const d1 = new THREE.DirectionalLight(0xffffff, 0.95); d1.position.set(4, 6, 5); scene.add(d1);
+  const d2 = new THREE.DirectionalLight(0xdfe8ff, 0.45); d2.position.set(-5, -1, -4); scene.add(d2);
+  const d3 = new THREE.DirectionalLight(0xffffff, 0.25); d3.position.set(0, -6, 3); scene.add(d3);
+  const pivot = new THREE.Group(); scene.add(pivot);
+  const holder = new THREE.Group(); holder.rotation.x = -Math.PI / 2; pivot.add(holder);
+  R3 = { renderer, scene, camera, pivot, holder, yaw: -0.6, pitch: 0.35, dist: 50, base: 50, target: new THREE.Vector3() };
+  const size = () => { const w = cv.clientWidth, h = cv.clientHeight; if (w && h) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); draw(); } };
+  new ResizeObserver(size).observe(cv); size();
+  let drag = null;
+  cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw: R3.yaw, pitch: R3.pitch }; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+  cv.addEventListener('pointermove', e => { if (!drag) return; R3.yaw = drag.yaw + (e.clientX - drag.x) * 0.01; R3.pitch = Math.max(-1.45, Math.min(1.45, drag.pitch + (e.clientY - drag.y) * 0.01)); draw(); });
+  const up = () => { drag = null; cv.style.cursor = 'grab'; }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('wheel', e => { e.preventDefault(); R3.dist = Math.max(R3.base * 0.25, Math.min(R3.base * 4, R3.dist * Math.exp(e.deltaY * 0.0012))); draw(); }, { passive: false });
+  cv.addEventListener('dblclick', () => { R3.yaw = -0.6; R3.pitch = 0.35; R3.dist = R3.base; draw(); });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', recolor);
+  new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+}
+function cssColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#999'; }
+function recolor() { if (!R3 || !R3.mat) return; R3.mat.color.set(cssColor('--steel')); R3.lines.material.color.set(cssColor('--edge')); draw(); }
+function draw() {
+  if (!R3) return; const { camera, pivot, renderer, scene } = R3;
+  pivot.rotation.set(R3.pitch, R3.yaw, 0, 'XYZ');
+  camera.position.set(0, 0, R3.dist); camera.lookAt(0, 0, 0); renderer.render(scene, camera);
+}
+function creaseGeometry(mesh, deg) {
+  const I = mesh.idx, P = mesh.pos, nT = I.length / 3, nV = P.length / 3, fn = new Float32Array(nT * 3), cos = Math.cos(deg * Math.PI / 180);
+  for (let t = 0; t < nT; t++) {
+    const a = 3 * I[3 * t], b = 3 * I[3 * t + 1], c = 3 * I[3 * t + 2];
+    const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2], vx = P[c] - P[a], vy = P[c + 1] - P[a + 1], vz = P[c + 2] - P[a + 2];
+    let x = uy * vz - uz * vy, y = uz * vx - ux * vz, z = ux * vy - uy * vx; const l = Math.hypot(x, y, z) || 1; fn[3 * t] = x / l; fn[3 * t + 1] = y / l; fn[3 * t + 2] = z / l;
+  }
+  const cnt = new Uint32Array(nV + 1); for (let i = 0; i < I.length; i++) cnt[I[i] + 1]++;
+  for (let i = 0; i < nV; i++) cnt[i + 1] += cnt[i];
+  const adj = new Uint32Array(I.length), fill = cnt.slice(0, nV);
+  for (let i = 0; i < I.length; i++) adj[fill[I[i]]++] = (i / 3) | 0;
+  const pos = new Float32Array(I.length * 3), nor = new Float32Array(I.length * 3);
+  for (let i = 0; i < I.length; i++) {
+    const v = I[i], t = (i / 3) | 0; pos[3 * i] = P[3 * v]; pos[3 * i + 1] = P[3 * v + 1]; pos[3 * i + 2] = P[3 * v + 2];
+    let x = 0, y = 0, z = 0;
+    for (let k = cnt[v]; k < cnt[v + 1]; k++) { const f = adj[k]; if (fn[3 * f] * fn[3 * t] + fn[3 * f + 1] * fn[3 * t + 1] + fn[3 * f + 2] * fn[3 * t + 2] >= cos) { x += fn[3 * f]; y += fn[3 * f + 1]; z += fn[3 * f + 2]; } }
+    const l = Math.hypot(x, y, z) || 1; nor[3 * i] = x / l; nor[3 * i + 1] = y / l; nor[3 * i + 2] = z / l;
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); return g;
+}
+function showMesh(mesh, s) {
+  if (!R3) return;
+  const { holder } = R3; while (holder.children.length) { const c = holder.children.pop(); c.geometry && c.geometry.dispose(); }
+  const g = creaseGeometry(mesh, 34);
+  R3.mat = R3.mat || new THREE.MeshStandardMaterial({ color: cssColor('--steel'), metalness: 0.42, roughness: 0.36 });
+  const m = new THREE.Mesh(g, R3.mat);
+  const eg = new THREE.EdgesGeometry(g, s.helix ? 48 : 28);
+  const lines = new THREE.LineSegments(eg, R3.lines ? R3.lines.material : new THREE.LineBasicMaterial({ color: cssColor('--edge'), transparent: true, opacity: 0.55 }));
+  R3.lines = lines;
+  const zTop = (s.head === 'csks' || s.head === 'cskf') ? 0 : s.k, zMid = (zTop - s.L) / 2;
+  m.position.z = -zMid; lines.position.z = -zMid; holder.add(m); holder.add(lines);
+  const rad = Math.hypot((zTop + s.L) / 2, Math.max(s.dk, s.d) / 2);
+  R3.base = rad / Math.sin(R3.camera.fov * Math.PI / 360) * 1.08; R3.dist = R3.base; recolor(); draw();
+}
+
+/* ---------- convert & export ---------- */
+function fileBase(s) { return s.designation.replace(/ – /g, '_').replace(/×/g, 'x').replace(/\s+/g, '').replace(/[^A-Za-z0-9._-]/g, '-'); }
+let buildGen = 0, buildTimer = null;
+function setLive(busy, txt) { $('live').classList.toggle('busy', busy); $('liveTxt').textContent = txt; }
+function scheduleBuild() {
+  if (sig(state) === lastSig && built) return;
+  clearTimeout(buildTimer); setLive(true, 'Updating…');
+  buildTimer = setTimeout(convert, state.helix ? 450 : 220);
+}
+async function convert() {
+  normalize(); const s = K.resolve(state); if (s.error) { say(s.error, true); return; }
+  const gen = ++buildGen; setLive(true, s.helix ? 'Modelling thread…' : 'Updating…'); $('dlZip').disabled = true; $('dlMsg').textContent = '';
+  await new Promise(r => setTimeout(r, 16)); if (gen !== buildGen) return;
+  const t0 = performance.now(); const mesh = K.buildMesh(s); const chk = K.checkManifold(mesh);
+  built = { s, mesh, chk, ms: Math.round(performance.now() - t0) }; lastSig = sig(state); cad = null;
+  if (R3) showMesh(mesh, s);
+  const mass = mesh.volume * 7.85e-3;
+  const watertight = chk.nonManifold === 0 && chk.misoriented === 0;
+  $('stats').innerHTML = [
+    ['Model', s.designation.replace(/^ISO [\d-]+ – /, '')], ['Facets', (mesh.idx.length / 3).toLocaleString()],
+    ['Volume', fmt(mesh.volume, 1) + ' mm³'], ['Mass (steel)', fmt(mass, mass < 1 ? 3 : 2) + ' g'],
+    ['Solid check', `<span class="${watertight ? 'ok' : ''}">${watertight ? 'closed & oriented' : 'open edges: ' + chk.nonManifold}</span>`], ['Thread', s.helix ? 'modelled helix' : 'cosmetic']
+  ].map(([k, v]) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  // prepare files
+  $('dlMsg').textContent = 'Writing STEP and STL…';
+  await new Promise(r => setTimeout(r, 20)); if (gen !== buildGen) return;
+  const base = fileBase(s), meta = { id: base, name: s.designation, desc: `${s.designation} ${s.std.title}`, file: base + '.step' };
+  const step = K.toSTEP(mesh, meta), stl = new Uint8Array(K.toSTL(mesh, s.designation));
+  const readme = [`${s.designation}`, `${s.std.title}`, '', `Thread: M${s.d}x${s.P} (${s.fine ? 'fine' : 'coarse'}), ${s.helix ? 'modelled helix (ISO 68-1 profile, right-hand)' : 'cosmetic (plain cylinder at major diameter)'}`,
+    `Nominal length: ${s.L} mm   Head: ${s.head === 'hex' ? 's ' + s.s : 'dk ' + s.dk} mm, k ${s.k} mm   Drive: ${s.drive === 'none' ? 'external hex' : driveKey(s)}`,
+    `Mass (steel 7.85 g/cm3): ${fmt(mass, 3)} g`, '', 'Units: millimetres. Origin on the screw axis at the length reference plane (under the head; top face for countersunk heads). +Z toward the head.',
+    'STEP: ISO 10303-21, AP214, faceted B-rep closed solid. STL: binary.', `Generated by ISO Screw Studio, ${new Date().toISOString().slice(0, 10)}.`].join('\r\n');
+  const enc = new TextEncoder();
+  const zip = await K.makeZip([{ name: base + '.step', data: enc.encode(step) }, { name: base + '.stl', data: stl }, { name: 'README.txt', data: enc.encode(readme) }]);
+  if (gen !== buildGen) return;
+  setLive(false, 'Up to date');
+  cad = { zip, name: base + '.zip', stepKB: step.length / 1024, stlKB: stl.length / 1024 };
+  $('dlZip').disabled = false;
+  $('dlMsg').textContent = `${base}.zip · ${(zip.size / 1024).toFixed(0)} KB (STEP ${(cad.stepKB / 1024).toFixed(1)} MB, STL ${(cad.stlKB / 1024).toFixed(1)} MB unpacked)`;
+}
+let downloads = null;
+async function save(filename, data) {
+  if (!downloads) { $('dlMsg').textContent = 'Saving files works when this page is open on claude.ai.'; return false; }
+  try { await downloads.save({ filename, data }); return true; }
+  catch (e) { const m = { declined: 'Download cancelled.', rate_limited: 'A save prompt is already open.', too_large: 'File too large for this view.' }[e && e.code] || 'Saving is unavailable in this view.'; $('dlMsg').textContent = m; return false; }
+}
+$('dlZip').onclick = async () => { if (!cad) return; if (await save(cad.name, cad.zip)) $('dlMsg').textContent = `Saved ${cad.name}`; };
+$('dlSvg').onclick = async () => { const s = K.resolve(state); const svg = drawSheet(s, { ...fileColors(), mass: s._mass || sp._mass }); await save(fileBase(s) + '_drawing.svg', svg); };
+$('len').onchange = e => { state.L = +e.target.value; update(); };
+$('lenDown').onclick = () => { const ls = K.lengthsFor(stdFor(state.head, state.drive), state.d), i = ls.indexOf(state.L); if (i > 0) { state.L = ls[i - 1]; update(); } };
+$('lenUp').onclick = () => { const ls = K.lengthsFor(stdFor(state.head, state.drive), state.d), i = ls.indexOf(state.L); if (i < ls.length - 1) { state.L = ls[i + 1]; update(); } };
+$('thPlain').onclick = () => { state.helix = false; update(); }; $('thHelix').onclick = () => { state.helix = true; update(); };
+
+/* ---------- command bar ---------- */
+function say(t, err) { const m = $('cmdMsg'); m.textContent = t; m.className = 'cmd-msg' + (err ? ' err' : ''); }
+function runCommand(txt) {
+  let t = ' ' + txt.toLowerCase().replace(/[×*]/g, 'x').replace(/,/g, ' ') + ' ', changed = [], wantConvert = false, wantDl = false;
+  const sz = t.match(/m\s?(1\.6|2\.5|12|10|1|2|3|4|5|6|8)(?![\d.])((?:\s*x\s*\d+(?:\.\d+)?){0,2})/);
+  if (sz) {
+    const d = +sz[1]; if (K.SIZES.includes(d)) { state.d = d; state.pitch = K.COARSE[d]; changed.push('M' + d); }
+    const nums = (sz[2].match(/\d+(?:\.\d+)?/g) || []).map(Number);
+    for (const n of nums) { if (n < 3 && [K.COARSE[d], ...K.FINE[d]].some(p => Math.abs(p - n) < 1e-9)) { state.pitch = n; changed.push('P ' + n); } else { state.L = n; changed.push(n + ' mm'); } }
+    t = t.replace(sz[0], ' ');
+  }
+  const lm = t.match(/(?:length|long|l\s?=?)\s*(\d+(?:\.\d+)?)|(\d+(?:\.\d+)?)\s?mm/); if (lm) { state.L = +(lm[1] || lm[2]); changed.push(state.L + ' mm'); }
+  const has = re => re.test(t);
+  if (has(/hex(agon)?\s*(head|bolt)|\bbolt\b|iso\s?4017|din\s?933/)) { state.head = 'hex'; state.drive = 'none'; changed.push('hex head'); }
+  else {
+    if (has(/socket\s*cap|\bcap\b|shcs|cylind|iso\s?4762|din\s?912/)) { state.head = 'cap'; changed.push('socket cap'); }
+    if (has(/button|7380/)) { state.head = 'button'; changed.push('button head'); }
+    if (has(/\bpan\b|7045|1580|14583/)) { state.head = 'pan'; changed.push('pan head'); }
+    if (has(/cheese|fillister|1207|14580/)) { state.head = 'cheese'; changed.push('cheese head'); }
+    if (has(/countersunk|counter-sunk|\bcsk\b|flat\s*head|10642|2009|7046|14581|7991/)) { const socket = has(/socket|allen|10642|7991/) || (has(/\bhex\b/) && !has(/phillips|pozi|slot|torx/)); state.head = socket ? 'csks' : 'cskf'; changed.push(socket ? 'countersunk socket' : 'countersunk flat'); }
+    if (has(/torx|hexalobular|six.?lobe|\btx?\d{1,2}\b/)) { state.drive = 'torx'; changed.push('Torx'); }
+    else if (has(/pozi|\bpz\d?\b/)) { state.drive = 'pz'; changed.push('Pozidriv'); }
+    else if (has(/phillips|cross|\bph\d?\b/)) { state.drive = 'ph'; changed.push('Phillips'); }
+    else if (has(/slot/)) { state.drive = 'slot'; changed.push('slotted'); }
+    else if (has(/allen|hex\s*socket|\bhex\b|inbus/)) { state.drive = 'hex'; changed.push('hex socket'); }
+  }
+  if (has(/\bfine\b/)) { state.pitch = K.FINE[state.d][0]; changed.push('fine pitch'); }
+  if (has(/\bcoarse\b/)) { state.pitch = K.COARSE[state.d]; changed.push('coarse pitch'); }
+  if (has(/helix|helical|real thread|modell?ed thread|true thread|with thread/)) { state.helix = true; changed.push('modelled thread'); }
+  if (has(/cosmetic|plain|no thread|simplified/)) { state.helix = false; changed.push('cosmetic thread'); }
+  if (has(/convert|\bcad\b|generate|build|make (the )?model|\bstep\b|\bstl\b|3d/)) wantConvert = true;
+  if (has(/download|export|save/)) { wantConvert = true; wantDl = true; }
+  const before = JSON.stringify(state); update();
+  const adj = []; if (sp) adj.push(sp.designation);
+  if (!changed.length && !wantConvert) { say('I did not recognise that. Try "M6 x 20 pan torx", "fine pitch", "modelled thread" or "convert to CAD".', true); return; }
+  say((changed.length ? 'Set ' + [...new Set(changed)].join(', ') + ' → ' + sp.designation : sp.designation) + (wantDl ? ' · preparing download…' : ''));
+  if (wantDl) { clearTimeout(buildTimer); convert().then(() => $('dlZip').click()); }
+}
+$('cmdForm').addEventListener('submit', e => { e.preventDefault(); const v = $('cmd').value.trim(); if (v) runCommand(v); });
+
+/* ---------- boot ---------- */
+const sun = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg>';
+const moon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="currentColor"/></svg>';
+const isDark = () => { const t = document.documentElement.getAttribute('data-theme'); return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
+function paintThemeBtn() { const d = isDark(), b = $('themeBtn'); b.innerHTML = d ? sun : moon; b.setAttribute('aria-label', d ? 'Switch to light mode' : 'Switch to dark mode'); }
+try { const t = localStorage.getItem('screw-theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+$('themeBtn').onclick = () => { const next = isDark() ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', next); try { localStorage.setItem('screw-theme', next); } catch (e) {} paintThemeBtn(); };
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', paintThemeBtn);
+paintThemeBtn(); initViewer(); update();
+if (window.claude && window.claude.use) window.claude.use('downloads').then(d => { downloads = d; if (!d) $('dlMsg').textContent = $('dlMsg').textContent || 'Saving files works when this page is open on claude.ai.'; }).catch(() => {});
+})();
+</script>
